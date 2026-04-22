@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Traffic System</title>
+
+
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        .upload-container {
+            margin-top: 20px;
+        }
+
+        .file-input {
+            margin: 10px;
+        }
+
+        input[type="file"] {
+            background: white;
+            color: black;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: limegreen;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .timer {
+            color: yellow;
+            font-size: 20px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .lane {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            width: 30%;
+        }
+
+        .active {
+            border: 3px solid limegreen;
+        }
+
+        img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .light {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 10px auto;
+            background: gray;
+        }
+
+        .red { background: red; }
+        .green { background: limegreen; }
+
+        .blink {
+            animation: blink 1s infinite;
+            color: red;
+            font-weight: bold;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.3; }
+        }
+
+        .filename {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #ccc;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🚦 Smart Traffic System</h1>
+
+<form method="POST" enctype="multipart/form-data" class="upload-container">
+
+    <div class="file-input">
+        <label>Lane 1:</label><br>
+        <input type="file" name="lane1" accept="image/*" onchange="showFileName(this, 'f1')">
+        <div id="f1" class="filename"></div>
+    </div>
+
+    <div class="file-input">
+        <label>Lane 2:</label><br>
+        <input type="file" name="lane2" accept="image/*" onchange="showFileName(this, 'f2')">
+        <div id="f2" class="filename"></div>
+    </div>
+
+    <div class="file-input">
+        <label>Lane 3:</label><br>
+        <input type="file" name="lane3" accept="image/*" onchange="showFileName(this, 'f3')">
+        <div id="f3" class="filename"></div>
+    </div>
+
+    <br>
+    <button type="submit">Analyze</button>
+</form>
+
+{% if lanes %}
+<h2 class="timer">⏱ Time Left: {{timer}} sec</h2>
+
+<div class="container">
+
+    {% for i in range(3) %}
+    <div class="lane {% if i == active_lane %}active{% endif %}">
+
+        <h3>Lane {{i+1}}</h3>
+
+        {% if lanes[i].image %}
+            <img src="data:image/jpeg;base64,{{lanes[i].image}}">
+        {% endif %}
+
+        <p>🚗 Vehicles: {{lanes[i].total}}</p>
+
+        {% if lanes[i].ambulance %}
+            <p class="blink">🚑 AMBULANCE DETECTED</p>
+        {% endif %}
+
+        {% if i == active_lane %}
+            <div class="light green"></div>
+            <p>GREEN</p>
+        {% else %}
+            <div class="light red"></div>
+            <p>RED</p>
+        {% endif %}
+
+    </div>
+    {% endfor %}
+
+</div>
+{% endif %}
+
+<script>
+function showFileName(input, id) {
+    const file = input.files[0];
+    if (file) {
+        document.getElementById(id).innerText = file.name;
+    }
+}
+</script>
+
+</body>
+</html>

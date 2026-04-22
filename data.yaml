@@ -1,0 +1,11 @@
+train: train/images
+val: train/images
+nc: 1
+names: ['ambulance']
+
+roboflow:
+  workspace: surajits-workspace-0rrph
+  project: surajits-workspace-0rrph
+  version: dataset
+  license: Private
+  url: https://app.roboflow.com/surajits-workspace-0rrph/surajits-workspace-0rrph/dataset
