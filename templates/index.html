@@ -1,173 +1,122 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Smart Traffic System</title>
+  <meta charset="UTF-8">
+  <title>Smart Traffic AI Dashboard</title>
 
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-
-    <style>
-        body {
-            font-family: Arial;
-            background: #0f172a;
-            color: white;
-            text-align: center;
-        }
-
-        h1 {
-            margin-top: 20px;
-        }
-
-        .upload-container {
-            margin-top: 20px;
-        }
-
-        .file-input {
-            margin: 10px;
-        }
-
-        input[type="file"] {
-            background: white;
-            color: black;
-            padding: 6px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        button {
-            padding: 10px 20px;
-            background: limegreen;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .timer {
-            color: yellow;
-            font-size: 20px;
-        }
-
-        .container {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-        }
-
-        .lane {
-            background: #1e293b;
-            padding: 15px;
-            border-radius: 12px;
-            width: 30%;
-        }
-
-        .active {
-            border: 3px solid limegreen;
-        }
-
-        img {
-            width: 100%;
-            border-radius: 10px;
-        }
-
-        .light {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin: 10px auto;
-            background: gray;
-        }
-
-        .red { background: red; }
-        .green { background: limegreen; }
-
-        .blink {
-            animation: blink 1s infinite;
-            color: red;
-            font-weight: bold;
-        }
-
-        @keyframes blink {
-            50% { opacity: 0.3; }
-        }
-
-        .filename {
-            font-size: 12px;
-            margin-top: 5px;
-            color: #ccc;
-        }
-    </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
 
-<h1>🚦 Smart Traffic System</h1>
-
-<form method="POST" enctype="multipart/form-data" class="upload-container">
-
-    <div class="file-input">
-        <label>Lane 1:</label><br>
-        <input type="file" name="lane1" accept="image/*" onchange="showFileName(this, 'f1')">
-        <div id="f1" class="filename"></div>
-    </div>
-
-    <div class="file-input">
-        <label>Lane 2:</label><br>
-        <input type="file" name="lane2" accept="image/*" onchange="showFileName(this, 'f2')">
-        <div id="f2" class="filename"></div>
-    </div>
-
-    <div class="file-input">
-        <label>Lane 3:</label><br>
-        <input type="file" name="lane3" accept="image/*" onchange="showFileName(this, 'f3')">
-        <div id="f3" class="filename"></div>
-    </div>
-
-    <br>
-    <button type="submit">Analyze</button>
-</form>
-
-{% if lanes %}
-<h2 class="timer">⏱ Time Left: {{timer}} sec</h2>
-
 <div class="container">
 
-    {% for i in range(3) %}
-    <div class="lane {% if i == active_lane %}active{% endif %}">
+  <h1 class="title">🚦 Smart Traffic AI System</h1>
 
-        <h3>Lane {{i+1}}</h3>
-
-        {% if lanes[i].image %}
-            <img src="data:image/jpeg;base64,{{lanes[i].image}}">
-        {% endif %}
-
-        <p>🚗 Vehicles: {{lanes[i].total}}</p>
-
-        {% if lanes[i].ambulance %}
-            <p class="blink">🚑 AMBULANCE DETECTED</p>
-        {% endif %}
-
-        {% if i == active_lane %}
-            <div class="light green"></div>
-            <p>GREEN</p>
-        {% else %}
-            <div class="light red"></div>
-            <p>RED</p>
-        {% endif %}
-
+  <!-- UPLOAD -->
+  <div class="card">
+    <h2>Upload Lane Images</h2>
+    <div class="upload-row">
+      <input type="file" id="lane1" accept="image/*">
+      <input type="file" id="lane2" accept="image/*">
+      <input type="file" id="lane3" accept="image/*">
+      <button type="button" onclick="sendImages()">Start</button>
     </div>
-    {% endfor %}
+  </div>
+
+  <!-- LANES -->
+  <div class="lane-grid">
+
+    <div class="lane-card" id="lane-A">
+      <h3>Lane A</h3>
+      <img id="img-A">
+      <p class="count">0</p>
+      <p id="density-A">Low</p>
+      <p id="signal-A">🔴</p>
+    </div>
+
+    <div class="lane-card" id="lane-B">
+      <h3>Lane B</h3>
+      <img id="img-B">
+      <p class="count">0</p>
+      <p id="density-B">Low</p>
+      <p id="signal-B">🔴</p>
+    </div>
+
+    <div class="lane-card" id="lane-C">
+      <h3>Lane C</h3>
+      <img id="img-C">
+      <p class="count">0</p>
+      <p id="density-C">Low</p>
+      <p id="signal-C">🔴</p>
+    </div>
+
+  </div>
+
+  <!-- AI + TIMER -->
+  <div class="row">
+
+    <div class="card">
+      <h2>AI Decision</h2>
+      <p>Lane: <span id="ai-lane">—</span></p>
+      <p>Reason: <span id="ai-reason">Waiting...</span></p>
+    </div>
+
+    <div class="card center">
+      <h2>Countdown</h2>
+      <div class="circle">
+        <svg viewBox="0 0 36 36">
+          <path class="bg" d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32"/>
+          <path id="circle-progress" class="progress" d="M18 2a16 16 0 1 1 0 32a16 16 0 1 1 0-32"/>
+        </svg>
+        <span id="timer">10</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- AI EXPLANATION -->
+  <div class="card">
+    <h2>AI Analysis</h2>
+    <div id="ai-details"></div>
+  </div>
+
+  <!-- GRAPH -->
+  <div class="card">
+    <h2>Traffic Density</h2>
+    <canvas id="densityChart"></canvas>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="row">
+
+    <div class="card">
+      <h2>Emergency</h2>
+      <div id="emergency-status">No Ambulance</div>
+    </div>
+
+    <div class="card">
+      <h2>Notifications</h2>
+      <ul id="notifications"></ul>
+    </div>
+
+    <div class="card">
+      <h2>History</h2>
+      <table>
+        <tbody id="history"></tbody>
+      </table>
+    </div>
+
+  </div>
 
 </div>
-{% endif %}
 
-<script>
-function showFileName(input, id) {
-    const file = input.files[0];
-    if (file) {
-        document.getElementById(id).innerText = file.name;
-    }
-}
-</script>
+<audio id="siren-audio" src="https://www.soundjay.com/misc/sounds/siren.wav"></audio>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 
 </body>
 </html>

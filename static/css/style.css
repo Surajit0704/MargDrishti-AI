@@ -1,0 +1,127 @@
+body {
+  font-family: Arial;
+  background: radial-gradient(circle at top, #0a0f1c, #000);
+  color: white;
+}
+
+.container {
+  padding: 20px;
+}
+
+.title {
+  text-align: center;
+  color: #06b6d4;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: rgba(255,255,255,0.05);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.upload-row {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  background: #06b6d4;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.lane-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.lane-card {
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  transition: 0.3s;
+}
+
+.lane-card.active {
+  box-shadow: 0 0 20px lime;
+  transform: scale(1.05);
+}
+
+.lane-card img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.count {
+  font-size: 28px;
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.row {
+  display: flex;
+  gap: 15px;
+}
+
+.center {
+  text-align: center;
+}
+
+.circle {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+
+.bg {
+  fill: none;
+  stroke: #333;
+  stroke-width: 3;
+}
+
+.progress {
+  fill: none;
+  stroke: #06b6d4;
+  stroke-width: 3;
+  stroke-dasharray: 100,100;
+}
+
+.circle span {
+  position: absolute;
+  top: 35%;
+  left: 40%;
+}
+
+@keyframes sirenFlash {
+  0% { background: rgba(255,0,0,0.2); }
+  50% { background: rgba(0,0,255,0.2); }
+  100% { background: rgba(255,0,0,0.2); }
+}
+
+.siren-active {
+  animation: sirenFlash 0.6s infinite;
+}
+
+.emergency-lane {
+  box-shadow: 0 0 25px red;
+}
+
+.ai-item {
+  font-size: 13px;
+  margin: 5px 0;
+  border-left: 3px solid cyan;
+  padding-left: 5px;
+}
+
+#notifications li {
+  font-size: 12px;
+  margin-bottom: 5px;
+}
