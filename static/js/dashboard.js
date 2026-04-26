@@ -1,34 +1,40 @@
+// ================= GLOBAL =================
 let countdown = 10;
 let interval;
 let cycleNumber = 0;
 
 const lanes = ["A", "B", "C"];
-let currentCycleTime = 10; // 🔥 store dynamic time
+let currentCycleTime = 10;
 
-// Chart
+// ================= CHART =================
 const ctx = document.getElementById("densityChart").getContext("2d");
+
 const chart = new Chart(ctx, {
   type: "bar",
   data: {
     labels: ["Lane A", "Lane B", "Lane C"],
     datasets: [{
       data: [0, 0, 0],
-      backgroundColor: ["#06b6d4","#22c55e","#f97316"]
+      backgroundColor: ["#06b6d4", "#22c55e", "#f97316"]
     }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true }
+    }
   }
 });
 
-// 🚀 SEND IMAGES
+// ================= SEND IMAGES =================
 async function sendImages() {
-
-  console.log("Start clicked");
 
   const f1 = document.getElementById("lane1").files[0];
   const f2 = document.getElementById("lane2").files[0];
   const f3 = document.getElementById("lane3").files[0];
 
   if (!f1 || !f2 || !f3) {
-    alert("Please upload all 3 images");
+    alert("Upload all 3 images");
     return;
   }
 
@@ -43,68 +49,106 @@ async function sendImages() {
       body: fd
     });
 
+    if (!res.ok) throw new Error("Backend error");
+
     const data = await res.json();
-    console.log("Response:", data);
 
     updateDashboard(data);
-
-    // 🔥 use backend timer
     startCountdown(data.timer);
 
   } catch (err) {
     console.error(err);
-    alert("Error connecting to backend");
+
+    // 🔥 FALLBACK DEMO DATA
+    alert("Backend error → showing demo");
+
+    const demo = {
+      counts: { "Lane 1": 12, "Lane 2": 25, "Lane 3": 8 },
+      density: { "Lane 1": "Medium", "Lane 2": "High", "Lane 3": "Low" },
+      signal_status: { "Lane 1": "Red", "Lane 2": "Green", "Lane 3": "Red" },
+      selected_lane: "Lane 2",
+      reason: "High density",
+      emergency_detected: false,
+      timer: 15,
+      lanes: [{}, {}, {}]
+    };
+
+    updateDashboard(demo);
+    startCountdown(15);
   }
 }
 
-// 🔄 UPDATE UI
+// ================= UPDATE UI =================
 function updateDashboard(data) {
 
-  currentCycleTime = data.timer || 10; // 🔥 store timer
-
+  currentCycleTime = data.timer || 10;
   document.getElementById("timer").textContent = currentCycleTime;
 
-  document.querySelectorAll(".lane-card")
-    .forEach(l => l.classList.remove("siren-active","emergency-lane"));
-
   const siren = document.getElementById("siren-audio");
+  const emergencyPanel = document.querySelector(".emergency");
 
-  lanes.forEach((l,i)=>{
+  // RESET ALL
+  document.querySelectorAll(".lane-card")
+    .forEach(l => l.classList.remove("active-lane", "siren-active", "emergency-lane"));
 
+  document.querySelectorAll(".light")
+    .forEach(light => {
+      light.classList.remove("green");
+      light.style.background = "#333";
+    });
+
+  if (emergencyPanel) emergencyPanel.classList.remove("emergency-active");
+
+  // LOOP LANES
+  lanes.forEach((l, i) => {
+
+    const count = data.counts[`Lane ${i+1}`] || 0;
+    const density = data.density[`Lane ${i+1}`] || "Low";
+    const signal = data.signal_status[`Lane ${i+1}`] || "Red";
+
+    // COUNT
     document.querySelector(`#lane-${l} .count`).textContent =
-      data.counts[`Lane ${i+1}`];
+      count + " vehicles";
 
-    document.getElementById(`density-${l}`).textContent =
-      data.density[`Lane ${i+1}`];
+    // DENSITY
+    document.getElementById(`density-${l}`).textContent = density;
 
-    const signal = data.signal_status[`Lane ${i+1}`];
-    document.getElementById(`signal-${l}`).textContent =
-      signal==="Green"?"🟢":"🔴";
-
-    document.getElementById(`lane-${l}`)
-      .classList.toggle("active", signal==="Green");
-
-    if(data.lanes[i].image){
+    // IMAGE
+    if (data.lanes[i] && data.lanes[i].image) {
       document.getElementById(`img-${l}`).src =
         "data:image/jpeg;base64," + data.lanes[i].image;
     }
+
+    // SIGNAL LIGHT
+    const light = document.getElementById(`signal-${l}`);
+
+    if (signal === "Green") {
+      light.classList.add("green");
+      light.style.background = "lime";
+
+      document.getElementById(`lane-${l}`)
+        .classList.add("active-lane");
+    }
   });
 
-  // 🧠 AI Decision
-  document.getElementById("ai-lane").textContent = data.selected_lane;
-  document.getElementById("ai-reason").textContent = data.reason;
+  // ================= AI DECISION =================
+  document.getElementById("ai-lane").textContent = data.selected_lane || "--";
+  document.getElementById("ai-reason").textContent = data.reason || "--";
 
-  // 🚑 Emergency
+  // ================= EMERGENCY =================
   const em = document.getElementById("emergency-status");
 
-  if(data.emergency_detected){
+  if (data.emergency_detected) {
+
     em.textContent = "🚑 " + data.emergency_lane;
 
     const idx = parseInt(data.emergency_lane.split(" ")[1]) - 1;
-    const lane = ["A","B","C"][idx];
+    const lane = lanes[idx];
 
     document.getElementById(`lane-${lane}`)
-      .classList.add("siren-active","emergency-lane");
+      .classList.add("siren-active", "emergency-lane");
+
+    if (emergencyPanel) emergencyPanel.classList.add("emergency-active");
 
     siren.currentTime = 0;
     siren.play();
@@ -114,52 +158,41 @@ function updateDashboard(data) {
     siren.pause();
   }
 
-  // 📊 AI Explanation
-  let html="";
-  Object.keys(data.counts).forEach(l=>{
-    html+=`<div class="ai-item">${l}: ${data.counts[l]} vehicles (${data.density[l]})</div>`;
-  });
-
-  html+= data.emergency_detected
-    ? `<div class="ai-item">🚑 Emergency override → ${data.emergency_lane}</div>`
-    : `<div class="ai-item">📊 Highest density → ${data.selected_lane}</div>`;
-
-  document.getElementById("ai-details").innerHTML = html;
-
-  // 📊 Chart
+  // ================= CHART =================
   chart.data.datasets[0].data =
-    lanes.map((_,i)=>data.counts[`Lane ${i+1}`]);
+    lanes.map((_, i) => data.counts[`Lane ${i+1}`] || 0);
   chart.update();
 
-  // 🔔 Logs
-  const li=document.createElement("li");
-  li.textContent=`Cycle ${++cycleNumber}: ${data.selected_lane} (${data.timer}s)`;
+  // ================= LOGS =================
+  const li = document.createElement("li");
+  li.textContent = `Cycle ${++cycleNumber}: ${data.selected_lane} (${data.timer}s)`;
+
   document.getElementById("notifications").prepend(li);
 }
 
-// ⏳ TIMER (DYNAMIC)
-function startCountdown(dynamicTime){
+// ================= TIMER =================
+function startCountdown(dynamicTime) {
 
   countdown = dynamicTime || 10;
   currentCycleTime = countdown;
 
   clearInterval(interval);
 
-  interval = setInterval(()=>{
+  interval = setInterval(() => {
 
     countdown--;
 
     document.getElementById("timer").textContent = countdown;
 
-    // 🔥 smooth circular progress
     const progress = (countdown / currentCycleTime) * 100;
+
     document.getElementById("circle-progress")
       .setAttribute("stroke-dasharray", `${progress},100`);
 
-    if(countdown <= 0){
+    if (countdown <= 0) {
       clearInterval(interval);
-      sendImages(); // next cycle
+      sendImages();
     }
 
-  },1000);
+  }, 1000);
 }
