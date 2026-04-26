@@ -1,91 +1,83 @@
-from flask import Flask, render_template, request, jsonify
+import os
 import cv2
 import numpy as np
-import base64
+from flask import Flask, render_template, request, jsonify
 from ultralytics import YOLO
-from YOLO_V8 import process_image
+import base64
 
 app = Flask(__name__)
 
-# Load models
-vehicle_model = YOLO("yolov8n.pt")
-ambulance_model = YOLO("runs/detect/train4/weights/best.pt")
+# =========================
+# 📁 PATHS
+# =========================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+vehicle_model_path = os.path.join(BASE_DIR, "yolov8n.pt")
+ambulance_model_path = os.path.join(BASE_DIR, "runs", "detect", "train4", "weights", "best.pt")
+
+print("\n===== MODEL CHECK =====")
+print("Vehicle:", os.path.exists(vehicle_model_path))
+print("Ambulance:", os.path.exists(ambulance_model_path))
+print("=======================\n")
+
+vehicle_model = YOLO(vehicle_model_path)
+ambulance_model = YOLO(ambulance_model_path) if os.path.exists(ambulance_model_path) else None
 
 
-# -------------------------------
-# Utility: Encode image to base64
-# -------------------------------
+# =========================
+# 🚗 VEHICLE COUNT (FIXED)
+# =========================
+def count_vehicles(img):
+    results = vehicle_model(img)[0]
+
+    vehicle_classes = [2, 3, 5, 7]  # car, bike, bus, truck
+
+    count = 0
+    for box in results.boxes:
+        cls = int(box.cls[0])
+        if cls in vehicle_classes:
+            count += 1
+
+    return count
+
+
+# =========================
+# 📊 DENSITY
+# =========================
+def get_density(count):
+    if count < 10:
+        return "Low"
+    elif count < 25:
+        return "Medium"
+    else:
+        return "High"
+
+
+# =========================
+# 🖼 ENCODE IMAGE
+# =========================
 def encode_image(img):
     _, buffer = cv2.imencode('.jpg', img)
     return base64.b64encode(buffer).decode('utf-8')
 
 
-# -------------------------------
-# Process each lane
-# -------------------------------
-def process_lane(file):
-    if file and file.filename != "":
-        file.seek(0)
-
-        file_bytes = np.frombuffer(file.read(), np.uint8)
-        img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-
-        if img is None:
-            return None, {}, 0, False, 0
-
-        # Vehicle detection
-        annotated, counts, total, _, _ = process_image(img)
-
-        # Ambulance detection
-        ambulance_results = ambulance_model(img)
-
-        ambulance_detected = False
-        max_conf = 0
-
-        for r in ambulance_results:
-            for box in r.boxes:
-                conf = float(box.conf)
-                if conf > 0.7:
-                    ambulance_detected = True
-                    max_conf = max(max_conf, conf)
-
-        img_base64 = encode_image(annotated)
-
-        return img_base64, counts, total, ambulance_detected, max_conf
-
-    return None, {}, 0, False, 0
-
-
-# -------------------------------
-# Smart lane selection
-# -------------------------------
-def choose_lane(totals, scores):
-    # Priority: Ambulance
-    strong_ambulances = [i for i in range(len(scores)) if scores[i] > 0.7]
-
-    if strong_ambulances:
-        return max(strong_ambulances, key=lambda i: scores[i])
-
-    # Otherwise highest traffic
-    if any(totals):
-        return totals.index(max(totals))
-
-    return 0
-
-
-# -------------------------------
-# HOME PAGE
-# -------------------------------
+# =========================
+# 🏠 ROUTE
+# =========================
 @app.route("/")
-def index():
+def dashboard():
     return render_template("index.html")
 
 
-# -------------------------------
-# MAIN API (REAL PROCESSING)
-# -------------------------------
+# =========================
+# 🚀 MAIN PROCESS
+# =========================
 @app.route("/process", methods=["POST"])
 def process():
+
+    # 🔥 RESET EACH REQUEST
+    best_lane = None
+    best_conf_global = 0
 
     files = [
         request.files.get("lane1"),
@@ -93,78 +85,110 @@ def process():
         request.files.get("lane3")
     ]
 
-    lanes = []
-    totals = []
-    ambulance_scores = []
-    emergency_detected = False
-    emergency_lane = None
+    counts = {}
+    density = {}
+    signal_status = {}
+    lanes_output = []
 
+    # =========================
+    # 🔍 PROCESS LANES
+    # =========================
     for i, file in enumerate(files):
-        img, counts, total, amb, score = process_lane(file)
 
-        lanes.append({
-            "image": img,
-            "counts": counts,
-            "total": total,
-            "ambulance": amb
+        img = cv2.imdecode(
+            np.frombuffer(file.read(), np.uint8),
+            cv2.IMREAD_COLOR
+        )
+
+        # 🚗 VEHICLE COUNT
+        vehicle_count = count_vehicles(img)
+        counts[f"Lane {i+1}"] = vehicle_count
+        density[f"Lane {i+1}"] = get_density(vehicle_count)
+
+        # 🚑 AMBULANCE DETECTION
+        best_conf_this_lane = 0
+
+        if ambulance_model:
+            results = ambulance_model(img, conf=0.4)[0]
+
+            for box in results.boxes:
+                conf = float(box.conf[0])
+                cls = int(box.cls[0])
+                label = ambulance_model.names[cls]
+
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                area = (x2 - x1) * (y2 - y1)
+                width = x2 - x1
+
+                print(f"Lane {i+1} → Label: {label}, Conf: {conf:.2f}, Area: {area}")
+
+                # ✅ STRICT FILTER (FINAL FIX)
+                if (
+                    label.lower() == "ambulance"
+                    and conf > 0.7
+                    and area > 12000
+                    and width > 120
+                ):
+                    if conf > best_conf_this_lane:
+                        best_conf_this_lane = conf
+
+                    # draw box
+                    cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 3)
+                    cv2.putText(img, f"AMB {conf:.2f}", (x1, y1 - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+
+        print(f"Lane {i+1} BEST CONF:", best_conf_this_lane)
+
+        # 🔥 GLOBAL BEST LANE
+        if best_conf_this_lane > best_conf_global:
+            best_conf_global = best_conf_this_lane
+            best_lane = f"Lane {i+1}"
+
+        lanes_output.append({
+            "image": encode_image(img)
         })
 
-        totals.append(total)
-        ambulance_scores.append(score)
+    # =========================
+    # 🧠 FINAL DECISION
+    # =========================
+    if best_lane is not None and best_conf_global > 0.7:
+        emergency_detected = True
+        selected_lane = best_lane
+        reason = "🚑 Emergency vehicle detected"
+    else:
+        emergency_detected = False
+        selected_lane = max(counts, key=counts.get)
+        reason = "Highest traffic density"
 
-        if amb and score > 0.7:
-            emergency_detected = True
-            emergency_lane = i
+    # =========================
+    # 🚦 SIGNAL LOGIC
+    # =========================
+    for lane in counts:
+        signal_status[lane] = "Green" if lane == selected_lane else "Red"
 
-    # AI decision
-    active_lane = choose_lane(totals, ambulance_scores)
+    # =========================
+    # ⏱ TIMER
+    # =========================
+    timer = int(max(10, min(counts[selected_lane] * 1.5, 60)))
 
-    # Timer logic
-    timer = max(10, totals[active_lane] * 2)
-
-    # Density classification
-    def get_density(val):
-        if val < 5:
-            return "Low"
-        elif val < 15:
-            return "Medium"
-        else:
-            return "High"
-
-    density = {
-        f"Lane {i+1}": get_density(totals[i])
-        for i in range(len(totals))
-    }
-
-    counts_dict = {
-        f"Lane {i+1}": totals[i]
-        for i in range(len(totals))
-    }
-
-    signal_status = {
-        f"Lane {i+1}": "Red"
-        for i in range(len(totals))
-    }
-
-    signal_status[f"Lane {active_lane+1}"] = "Green"
-
-    reason = "Ambulance Detected" if emergency_detected else "Highest Density"
-
+    # =========================
+    # 📦 RESPONSE
+    # =========================
     return jsonify({
-        "lanes": lanes,
-        "counts": counts_dict,
+        "counts": counts,
         "density": density,
         "signal_status": signal_status,
-        "selected_lane": f"Lane {active_lane+1}",
-        "emergency_detected": emergency_detected,
-        "emergency_lane": f"Lane {emergency_lane+1}" if emergency_lane is not None else None,
+        "selected_lane": selected_lane,
         "reason": reason,
-        "timer": timer
+        "lanes": lanes_output,
+        "timer": timer,
+        "emergency_detected": emergency_detected,
+        "emergency_lane": selected_lane if emergency_detected else None
     })
 
 
-# -------------------------------
-# RUN
-# -------------------------------
+# =========================
+# ▶️ RUN
+# =========================
 if __name__ == "__main__":
     app.run(debug=True)

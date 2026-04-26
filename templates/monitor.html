@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="topbar">
+  <h1>Traffic Monitor</h1>
+</div>
+
+<div class="lane-grid">
+
+  <div class="lane-card">
+    <span class="lane-label">Lane A</span>
+    <img src="" alt="Feed A">
+    <div class="overlay">
+      <p>Live Feed</p>
+    </div>
+  </div>
+
+  <div class="lane-card">
+    <span class="lane-label">Lane B</span>
+    <img src="" alt="Feed B">
+    <div class="overlay">
+      <p>Live Feed</p>
+    </div>
+  </div>
+
+  <div class="lane-card">
+    <span class="lane-label">Lane C</span>
+    <img src="" alt="Feed C">
+    <div class="overlay">
+      <p>Live Feed</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="card">
+  <h3>Status</h3>
+  <p>System running. Waiting for real-time integration...</p>
+</div>
+
+{% endblock %}

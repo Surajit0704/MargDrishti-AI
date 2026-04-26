@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="topbar">
+  <h1>Settings</h1>
+</div>
+
+<div class="card">
+  <h3>System Configuration</h3>
+
+  <label>Minimum Timer (sec)</label><br>
+  <input type="number" value="10"><br><br>
+
+  <label>Max Timer (sec)</label><br>
+  <input type="number" value="60"><br><br>
+
+  <button>Save Settings</button>
+</div>
+
+<div class="card">
+  <h3>About</h3>
+  <p>Smart Traffic AI System</p>
+  <p>Version 1.0</p>
+</div>
+
+{% endblock %}

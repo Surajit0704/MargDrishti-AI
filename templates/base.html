@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Traffic AI Dashboard</title>
+
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2>🚦 Smart Traffic</h2>
+
+    <ul>
+      <li class="{{ 'active' if page=='dashboard' else '' }}">
+        <a href="/">Dashboard</a>
+      </li>
+
+      <li class="{{ 'active' if page=='monitor' else '' }}">
+        <a href="/monitor">Traffic Monitor</a>
+      </li>
+
+      <li class="{{ 'active' if page=='signals' else '' }}">
+        <a href="/signals">Signal Control</a>
+      </li>
+
+      <li class="{{ 'active' if page=='logs' else '' }}">
+        <a href="/logs">Logs</a>
+      </li>
+
+      <li class="{{ 'active' if page=='settings' else '' }}">
+        <a href="/settings">Settings</a>
+      </li>
+    </ul>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    {% block content %}{% endblock %}
+  </main>
+
+</div>
+
+</body>
+</html>

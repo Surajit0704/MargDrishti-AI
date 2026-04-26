@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="topbar">
+  <h1>Signal Control</h1>
+</div>
+
+<div class="card">
+  <h3>Manual Override</h3>
+
+  <div class="signal">
+    <p>Lane A</p>
+    <button onclick="setSignal('A')">Green</button>
+  </div>
+
+  <div class="signal">
+    <p>Lane B</p>
+    <button onclick="setSignal('B')">Green</button>
+  </div>
+
+  <div class="signal">
+    <p>Lane C</p>
+    <button onclick="setSignal('C')">Green</button>
+  </div>
+
+</div>
+
+<div class="card">
+  <h3>Current Mode</h3>
+  <p id="mode">Auto AI Control</p>
+</div>
+
+<script>
+function setSignal(lane){
+  document.getElementById("mode").textContent = "Manual: Lane " + lane;
+  alert("Manual override: Lane " + lane + " is GREEN");
+}
+</script>
+
+{% endblock %}

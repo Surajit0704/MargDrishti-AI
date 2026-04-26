@@ -1,146 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Smart Traffic AI Dashboard</title>
+{% extends "base.html" %}
 
-<link rel="stylesheet" href="/static/css/style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% block content %}
 
-</head>
+<!-- TOP BAR -->
+<div class="topbar">
+  <h1>Smart Traffic AI System</h1>
+  <button onclick="sendImages()">Start System</button>
+</div>
 
-<body>
+<!-- UPLOAD -->
+<div class="card">
+  <input type="file" id="lane1" accept="image/*">
+  <input type="file" id="lane2" accept="image/*">
+  <input type="file" id="lane3" accept="image/*">
+</div>
 
-<div class="dashboard">
+<!-- LANES -->
+<div class="lane-grid">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <h2>🚦 Smart Traffic</h2>
-    <ul>
-      <li class="active">Dashboard</li>
-      <li>Traffic Monitor</li>
-      <li>Signal Control</li>
-      <li>Logs</li>
-      <li>Settings</li>
-    </ul>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="main">
-
-    <div class="topbar">
-      <h1>Smart Traffic AI System</h1>
-      <button onclick="sendImages()">Start System</button>
+  <!-- Lane A -->
+  <div class="lane-card" id="lane-A">
+    <span class="lane-label">Lane A</span>
+    <img id="img-A" src="">
+    <div class="overlay">
+      <p class="count">0 vehicles</p>
+      <p id="density-A">Low</p>
     </div>
+  </div>
 
-    <!-- UPLOAD -->
-    <div class="card">
-      <input type="file" id="lane1">
-      <input type="file" id="lane2">
-      <input type="file" id="lane3">
+  <!-- Lane B -->
+  <div class="lane-card" id="lane-B">
+    <span class="lane-label">Lane B</span>
+    <img id="img-B" src="">
+    <div class="overlay">
+      <p class="count">0 vehicles</p>
+      <p id="density-B">Low</p>
     </div>
+  </div>
 
-    <!-- LANES -->
-    <div class="lane-grid">
-
-      <div class="lane-card" id="lane-A">
-        <span class="lane-label">Lane A</span>
-        <img id="img-A">
-        <div class="overlay">
-          <p class="count">0 vehicles</p>
-          <p id="density-A">Low</p>
-        </div>
-      </div>
-
-      <div class="lane-card" id="lane-B">
-        <span class="lane-label">Lane B</span>
-        <img id="img-B">
-        <div class="overlay">
-          <p class="count">0 vehicles</p>
-          <p id="density-B">Low</p>
-        </div>
-      </div>
-
-      <div class="lane-card" id="lane-C">
-        <span class="lane-label">Lane C</span>
-        <img id="img-C">
-        <div class="overlay">
-          <p class="count">0 vehicles</p>
-          <p id="density-C">Low</p>
-        </div>
-      </div>
-
+  <!-- Lane C -->
+  <div class="lane-card" id="lane-C">
+    <span class="lane-label">Lane C</span>
+    <img id="img-C" src="">
+    <div class="overlay">
+      <p class="count">0 vehicles</p>
+      <p id="density-C">Low</p>
     </div>
-
-    <!-- BOTTOM -->
-    <div class="bottom-grid">
-
-      <div class="card">
-        <h3>AI Decision</h3>
-        <p>Lane: <span id="ai-lane">—</span></p>
-        <p>Reason: <span id="ai-reason">Waiting...</span></p>
-      </div>
-
-      <div class="card center">
-        <h3>Timer</h3>
-        <div class="circle">
-          <svg viewBox="0 0 36 36">
-            <path class="bg" d="M18 2a16 16 0 1 1 0 32"/>
-            <path id="circle-progress" class="progress" d="M18 2a16 16 0 1 1 0 32"/>
-          </svg>
-          <span id="timer">10</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Traffic Density</h3>
-        <canvas id="densityChart"></canvas>
-      </div>
-
-    </div>
-
-  </main>
-
-  <!-- RIGHT PANEL -->
-  <aside class="right-panel">
-
-    <div class="card emergency">
-      <h3>🚨 Emergency</h3>
-      <div id="emergency-status">No Ambulance</div>
-    </div>
-
-    <div class="card">
-      <h3>Signals</h3>
-
-      <div class="signal">
-        <p>Lane A</p>
-        <div id="signal-A" class="light"></div>
-      </div>
-
-      <div class="signal">
-        <p>Lane B</p>
-        <div id="signal-B" class="light"></div>
-      </div>
-
-      <div class="signal">
-        <p>Lane C</p>
-        <div id="signal-C" class="light"></div>
-      </div>
-
-    </div>
-
-    <div class="card">
-      <h3>Logs</h3>
-      <ul id="notifications"></ul>
-    </div>
-
-  </aside>
+  </div>
 
 </div>
 
+<!-- BOTTOM GRID -->
+<div class="bottom-grid">
+
+  <!-- AI DECISION -->
+  <div class="card">
+    <h3>🧠 AI Decision</h3>
+    <p>Lane: <span id="ai-lane">—</span></p>
+    <p>Reason: <span id="ai-reason">Waiting...</span></p>
+  </div>
+
+  <!-- TIMER -->
+  <div class="card center">
+    <h3>⏳ Timer</h3>
+    <div class="circle">
+      <svg viewBox="0 0 36 36">
+        <path class="bg" d="M18 2a16 16 0 1 1 0 32"/>
+        <path id="circle-progress" class="progress" d="M18 2a16 16 0 1 1 0 32"/>
+      </svg>
+      <span id="timer">10</span>
+    </div>
+  </div>
+
+  <!-- GRAPH -->
+  <div class="card">
+    <h3>📊 Traffic Density</h3>
+    <canvas id="densityChart"></canvas>
+  </div>
+
+</div>
+
+<!-- EMERGENCY -->
+<div class="card emergency">
+  <h3>🚨 Emergency</h3>
+  <div id="emergency-status">No Ambulance</div>
+</div>
+
+<!-- LOGS -->
+<div class="card">
+  <h3>📜 Logs</h3>
+  <ul id="notifications"></ul>
+</div>
+
+<!-- AUDIO -->
 <audio id="siren-audio" src="https://www.soundjay.com/misc/sounds/siren.wav"></audio>
 
+<!-- JS -->
 <script src="/static/js/dashboard.js"></script>
 
-</body>
-</html>
+{% endblock %}
