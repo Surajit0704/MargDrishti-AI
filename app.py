@@ -8,24 +8,39 @@ import base64
 app = Flask(__name__)
 
 # =========================
+# 🔥 MODE SWITCH
+# =========================
+USE_AMBULANCE = os.environ.get("USE_AMBULANCE", "false").lower() == "true"
+
+# =========================
 # 📁 PATHS
 # =========================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 vehicle_model_path = os.path.join(BASE_DIR, "yolov8n.pt")
-ambulance_model_path = os.path.join(BASE_DIR, "runs", "detect", "train4", "weights", "best.pt")
+ambulance_model_path = os.path.join(BASE_DIR, "best.pt")
 
 print("\n===== MODEL CHECK =====")
 print("Vehicle:", os.path.exists(vehicle_model_path))
 print("Ambulance:", os.path.exists(ambulance_model_path))
+print("USE_AMBULANCE:", USE_AMBULANCE)
 print("=======================\n")
 
+# =========================
+# 🚗 LOAD MODELS
+# =========================
 vehicle_model = YOLO(vehicle_model_path)
-ambulance_model = YOLO(ambulance_model_path) if os.path.exists(ambulance_model_path) else None
 
+ambulance_model = None
+if USE_AMBULANCE:
+    if os.path.exists(ambulance_model_path):
+        print("Loading ambulance model...")
+        ambulance_model = YOLO(ambulance_model_path)
+    else:
+        print("best.pt not found, skipping ambulance detection")
 
 # =========================
-# 🚗 VEHICLE COUNT (FIXED)
+# 🚗 VEHICLE COUNT
 # =========================
 def count_vehicles(img):
     results = vehicle_model(img)[0]
@@ -40,7 +55,6 @@ def count_vehicles(img):
 
     return count
 
-
 # =========================
 # 📊 DENSITY
 # =========================
@@ -52,14 +66,12 @@ def get_density(count):
     else:
         return "High"
 
-
 # =========================
 # 🖼 ENCODE IMAGE
 # =========================
 def encode_image(img):
     _, buffer = cv2.imencode('.jpg', img)
     return base64.b64encode(buffer).decode('utf-8')
-
 
 # =========================
 # 🏠 ROUTE
@@ -68,14 +80,12 @@ def encode_image(img):
 def dashboard():
     return render_template("index.html")
 
-
 # =========================
 # 🚀 MAIN PROCESS
 # =========================
 @app.route("/process", methods=["POST"])
 def process():
 
-    # 🔥 RESET EACH REQUEST
     best_lane = None
     best_conf_global = 0
 
@@ -122,7 +132,6 @@ def process():
 
                 print(f"Lane {i+1} → Label: {label}, Conf: {conf:.2f}, Area: {area}")
 
-                # ✅ STRICT FILTER (FINAL FIX)
                 if (
                     label.lower() == "ambulance"
                     and conf > 0.7
@@ -132,14 +141,12 @@ def process():
                     if conf > best_conf_this_lane:
                         best_conf_this_lane = conf
 
-                    # draw box
                     cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 3)
                     cv2.putText(img, f"AMB {conf:.2f}", (x1, y1 - 10),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
         print(f"Lane {i+1} BEST CONF:", best_conf_this_lane)
 
-        # 🔥 GLOBAL BEST LANE
         if best_conf_this_lane > best_conf_global:
             best_conf_global = best_conf_this_lane
             best_lane = f"Lane {i+1}"
@@ -186,9 +193,9 @@ def process():
         "emergency_lane": selected_lane if emergency_detected else None
     })
 
-
 # =========================
 # ▶️ RUN
 # =========================
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
