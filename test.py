@@ -3,7 +3,7 @@ import cv2
 
 model = YOLO("runs/detect/train4/weights/best.pt")
 
-img = cv2.imread(r"D:\PYTHON_TUTEDUDE\gettyimages-1235264888-612x612.jpg")
+img = cv2.imread(r"D:\traffic_project_fresh\dataset\lane_3\ambulance_1.jpeg")
 
 results = model(img)
 

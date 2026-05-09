@@ -1,201 +1,576 @@
-import os
+from flask import Flask, render_template, request, jsonify
 import cv2
 import numpy as np
-from flask import Flask, render_template, request, jsonify
-from ultralytics import YOLO
 import base64
+import os
+import random
+
+from ultralytics import YOLO
+from YOLO_V8 import process_image
 
 app = Flask(__name__)
 
-# =========================
-# 🔥 MODE SWITCH
-# =========================
-USE_AMBULANCE = os.environ.get("USE_AMBULANCE", "false").lower() == "true"
+# ==========================================
+# LOAD MODELS
+# ==========================================
 
-# =========================
-# 📁 PATHS
-# =========================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+vehicle_model = YOLO("yolov8n.pt")
+ambulance_model = YOLO("runs/detect/train4/weights/best.pt")
 
-vehicle_model_path = os.path.join(BASE_DIR, "yolov8n.pt")
-ambulance_model_path = os.path.join(BASE_DIR, "best.pt")
 
-print("\n===== MODEL CHECK =====")
-print("Vehicle:", os.path.exists(vehicle_model_path))
-print("Ambulance:", os.path.exists(ambulance_model_path))
-print("USE_AMBULANCE:", USE_AMBULANCE)
-print("=======================\n")
+# ==========================================
+# DATASET PATHS
+# ==========================================
 
-# =========================
-# 🚗 LOAD MODELS
-# =========================
-vehicle_model = YOLO(vehicle_model_path)
+DATASET_PATHS = {
+    "lane_1": "dataset/lane_1",
+    "lane_2": "dataset/lane_2",
+    "lane_3": "dataset/lane_3"
+}
 
-ambulance_model = None
-if USE_AMBULANCE:
-    if os.path.exists(ambulance_model_path):
-        print("Loading ambulance model...")
-        ambulance_model = YOLO(ambulance_model_path)
-    else:
-        print("best.pt not found, skipping ambulance detection")
 
-# =========================
-# 🚗 VEHICLE COUNT
-# =========================
-def count_vehicles(img):
-    results = vehicle_model(img)[0]
+# ==========================================
+# PRIORITY OVERRIDE STATE
+# ==========================================
 
-    vehicle_classes = [2, 3, 5, 7]  # car, bike, bus, truck
+manual_override = False
+override_lane = None
+override_reason = None
+lane_3_first_run = True
 
-    count = 0
-    for box in results.boxes:
-        cls = int(box.cls[0])
-        if cls in vehicle_classes:
-            count += 1
 
-    return count
+# ==========================================
+# ENCODE IMAGE
+# ==========================================
 
-# =========================
-# 📊 DENSITY
-# =========================
-def get_density(count):
-    if count < 10:
-        return "Low"
-    elif count < 25:
-        return "Medium"
-    else:
-        return "High"
-
-# =========================
-# 🖼 ENCODE IMAGE
-# =========================
 def encode_image(img):
+
     _, buffer = cv2.imencode('.jpg', img)
+
     return base64.b64encode(buffer).decode('utf-8')
 
-# =========================
-# 🏠 ROUTE
-# =========================
-@app.route("/")
-def dashboard():
-    return render_template("index.html")
 
-# =========================
-# 🚀 MAIN PROCESS
-# =========================
+# ==========================================
+# RANDOM IMAGE PICKER
+# ==========================================
+
+def get_random_image(folder_path):
+
+    try:
+
+        valid_extensions = (
+            ".jpg",
+            ".jpeg",
+            ".png"
+        )
+
+        files = [
+
+            f for f in os.listdir(folder_path)
+
+            if f.lower().endswith(valid_extensions)
+
+        ]
+
+        if not files:
+
+            print(f"❌ No images found in {folder_path}")
+
+            return None
+
+        selected_file = random.choice(files)
+
+        full_path = os.path.join(
+            folder_path,
+            selected_file
+        )
+
+        print(f"📷 Selected: {full_path}")
+
+        return full_path
+
+    except Exception as e:
+
+        print("❌ Dataset error:", e)
+
+        return None
+
+
+# ==========================================
+# PROCESS IMAGE PATH
+# ==========================================
+
+def process_lane_image(image_path):
+
+    if image_path is None:
+
+        return None, {}, 0, False, 0
+
+    img = cv2.imread(image_path)
+
+    if img is None:
+
+        return None, {}, 0, False, 0
+
+    # ==========================================
+    # VEHICLE DETECTION
+    # ==========================================
+
+    annotated, counts, total, _, _ = process_image(img)
+
+    # ==========================================
+    # AMBULANCE DETECTION
+    # ==========================================
+
+    ambulance_results = ambulance_model(img)
+
+    ambulance_detected = False
+
+    max_conf = 0
+
+    for r in ambulance_results:
+
+        for box in r.boxes:
+
+            conf = float(box.conf)
+
+            if conf > 0.7:
+
+                ambulance_detected = True
+
+                max_conf = max(max_conf, conf)
+
+    img_base64 = encode_image(annotated)
+
+    return (
+        img_base64,
+        counts,
+        total,
+        ambulance_detected,
+        max_conf
+    )
+
+
+# ==========================================
+# SMART AI LANE SELECTION
+# ==========================================
+
+def choose_lane(totals, scores):
+
+    # PRIORITY: AMBULANCE
+
+    strong_ambulances = [
+
+        i for i in range(len(scores))
+
+        if scores[i] > 0.7
+
+    ]
+
+    if strong_ambulances:
+
+        return max(
+            strong_ambulances,
+            key=lambda i: scores[i]
+        )
+
+    # OTHERWISE HIGHEST TRAFFIC
+
+    if any(totals):
+
+        return totals.index(max(totals))
+
+    return 0
+
+
+# ==========================================
+# HOME PAGE
+# ==========================================
+
+@app.route("/")
+def index():
+
+    return render_template(
+        "dashboard_test.html",
+        page="dashboard"
+    )
+
+
+# ==========================================
+# OVERRIDE PAGE
+# ==========================================
+
+@app.route("/override")
+def override():
+
+    return render_template(
+        "override.html",
+        page="override"
+    )
+
+
+# ==========================================
+# MONITOR PAGE
+# ==========================================
+
+@app.route("/monitor")
+def monitor():
+
+    return render_template(
+        "monitor.html",
+        page="monitor"
+    )
+
+
+# ==========================================
+# SIGNAL PAGE
+# ==========================================
+
+@app.route("/signals")
+def signals():
+
+    return render_template(
+        "signals.html",
+        page="signals"
+    )
+
+
+# ==========================================
+# LOGS PAGE
+# ==========================================
+
+@app.route("/logs")
+def logs():
+
+    return render_template(
+        "logs.html",
+        page="logs"
+    )
+
+
+# ==========================================
+# SETTINGS PAGE
+# ==========================================
+
+@app.route("/settings")
+def settings():
+
+    return render_template(
+        "settings.html",
+        page="settings"
+    )
+
+
+# ==========================================
+# ACTIVATE OVERRIDE
+# ==========================================
+
+@app.route("/activate_override", methods=["POST"])
+def activate_override():
+
+    global manual_override
+    global override_lane
+    global override_reason
+
+    data = request.json
+
+    lane = data.get("lane")
+
+    reason = data.get(
+        "reason",
+        "Manual Override"
+    )
+
+    if lane is None:
+
+        return jsonify({
+
+            "success": False,
+            "message": "No lane selected"
+
+        })
+
+    manual_override = True
+
+    override_lane = int(lane)
+
+    override_reason = reason
+
+    return jsonify({
+
+        "success": True,
+        "override_active": True,
+        "lane": override_lane,
+        "reason": override_reason
+
+    })
+
+
+# ==========================================
+# DISABLE OVERRIDE
+# ==========================================
+
+@app.route("/disable_override", methods=["POST"])
+def disable_override():
+
+    global manual_override
+    global override_lane
+    global override_reason
+
+    manual_override = False
+
+    override_lane = None
+
+    override_reason = None
+
+    return jsonify({
+
+        "success": True,
+        "override_active": False
+
+    })
+
+
+# ==========================================
+# OVERRIDE STATUS
+# ==========================================
+
+@app.route("/override_status")
+def override_status():
+
+    return jsonify({
+
+        "manual_override": manual_override,
+        "override_lane": override_lane,
+        "override_reason": override_reason
+
+    })
+
+
+# ==========================================
+# MAIN PROCESSING API
+# ==========================================
+
 @app.route("/process", methods=["POST"])
 def process():
 
-    best_lane = None
-    best_conf_global = 0
+    global manual_override
+    global override_lane
+    global override_reason
+    global lane_3_first_run
 
-    files = [
-        request.files.get("lane1"),
-        request.files.get("lane2"),
-        request.files.get("lane3")
+    # ==========================================
+    # RANDOM IMAGE SELECTION
+    # ==========================================
+
+    lane_1_path = get_random_image(DATASET_PATHS["lane_1"])
+    lane_2_path = get_random_image(DATASET_PATHS["lane_2"])
+
+    if lane_3_first_run:
+        lane_3_path = os.path.join(DATASET_PATHS["lane_3"], "medium_1.jpeg")
+        if not os.path.exists(lane_3_path):
+            lane_3_path = get_random_image(DATASET_PATHS["lane_3"])
+        lane_3_first_run = False
+    else:
+        lane_3_path = get_random_image(DATASET_PATHS["lane_3"])
+
+    lane_paths = [
+        lane_1_path,
+        lane_2_path,
+        lane_3_path
     ]
 
-    counts = {}
-    density = {}
-    signal_status = {}
-    lanes_output = []
+    lanes = []
 
-    # =========================
-    # 🔍 PROCESS LANES
-    # =========================
-    for i, file in enumerate(files):
+    totals = []
 
-        img = cv2.imdecode(
-            np.frombuffer(file.read(), np.uint8),
-            cv2.IMREAD_COLOR
-        )
+    ambulance_scores = []
 
-        # 🚗 VEHICLE COUNT
-        vehicle_count = count_vehicles(img)
-        counts[f"Lane {i+1}"] = vehicle_count
-        density[f"Lane {i+1}"] = get_density(vehicle_count)
+    emergency_detected = False
 
-        # 🚑 AMBULANCE DETECTION
-        best_conf_this_lane = 0
+    emergency_lane = None
 
-        if ambulance_model:
-            results = ambulance_model(img, conf=0.4)[0]
+    # ==========================================
+    # PROCESS ALL LANES
+    # ==========================================
 
-            for box in results.boxes:
-                conf = float(box.conf[0])
-                cls = int(box.cls[0])
-                label = ambulance_model.names[cls]
+    for i, path in enumerate(lane_paths):
 
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                area = (x2 - x1) * (y2 - y1)
-                width = x2 - x1
+        (
+            img,
+            counts,
+            total,
+            amb,
+            score
 
-                print(f"Lane {i+1} → Label: {label}, Conf: {conf:.2f}, Area: {area}")
+        ) = process_lane_image(path)
 
-                if (
-                    label.lower() == "ambulance"
-                    and conf > 0.7
-                    and area > 12000
-                    and width > 120
-                ):
-                    if conf > best_conf_this_lane:
-                        best_conf_this_lane = conf
+        lanes.append({
 
-                    cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 3)
-                    cv2.putText(img, f"AMB {conf:.2f}", (x1, y1 - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+            "image": img,
+            "counts": counts,
+            "total": total,
+            "ambulance": amb
 
-        print(f"Lane {i+1} BEST CONF:", best_conf_this_lane)
-
-        if best_conf_this_lane > best_conf_global:
-            best_conf_global = best_conf_this_lane
-            best_lane = f"Lane {i+1}"
-
-        lanes_output.append({
-            "image": encode_image(img)
         })
 
-    # =========================
-    # 🧠 FINAL DECISION
-    # =========================
-    if best_lane is not None and best_conf_global > 0.7:
-        emergency_detected = True
-        selected_lane = best_lane
-        reason = "🚑 Emergency vehicle detected"
+        totals.append(total)
+
+        ambulance_scores.append(score)
+
+        if amb and score > 0.7:
+
+            emergency_detected = True
+
+            emergency_lane = i
+
+    # ==========================================
+    # PRIORITY OVERRIDE LOGIC
+    # ==========================================
+
+    if manual_override and override_lane is not None:
+
+        active_lane = override_lane
+
+        reason = (
+            f"Priority Override - "
+            f"Lane {override_lane + 1}"
+        )
+
+        timer = 9999
+
     else:
-        emergency_detected = False
-        selected_lane = max(counts, key=counts.get)
-        reason = "Highest traffic density"
 
-    # =========================
-    # 🚦 SIGNAL LOGIC
-    # =========================
-    for lane in counts:
-        signal_status[lane] = "Green" if lane == selected_lane else "Red"
+        active_lane = choose_lane(
+            totals,
+            ambulance_scores
+        )
 
-    # =========================
-    # ⏱ TIMER
-    # =========================
-    timer = int(max(10, min(counts[selected_lane] * 1.5, 60)))
+        reason = (
 
-    # =========================
-    # 📦 RESPONSE
-    # =========================
+            "Ambulance Detected"
+
+            if emergency_detected
+
+            else "Highest Density"
+
+        )
+
+        timer = max(
+            10,
+            totals[active_lane] * 2
+        )
+
+    # ==========================================
+    # DENSITY CLASSIFICATION
+    # ==========================================
+
+    def get_density(val):
+
+        if val < 5:
+
+            return "Low"
+
+        elif val < 15:
+
+            return "Medium"
+
+        else:
+
+            return "High"
+
+    density = {
+
+        f"Lane {i+1}": get_density(totals[i])
+
+        for i in range(len(totals))
+
+    }
+
+    counts_dict = {
+
+        f"Lane {i+1}": totals[i]
+
+        for i in range(len(totals))
+
+    }
+
+    # ==========================================
+    # SIGNAL STATUS
+    # ==========================================
+
+    signal_status = {
+
+        f"Lane {i+1}": "Red"
+
+        for i in range(len(totals))
+
+    }
+
+    signal_status[
+        f"Lane {active_lane+1}"
+    ] = "Green"
+
+    # ==========================================
+    # FINAL RESPONSE
+    # ==========================================
+
     return jsonify({
-        "counts": counts,
+
+        "lanes": lanes,
+
+        "counts": counts_dict,
+
         "density": density,
+
         "signal_status": signal_status,
-        "selected_lane": selected_lane,
-        "reason": reason,
-        "lanes": lanes_output,
-        "timer": timer,
+
+        "selected_lane": f"Lane {active_lane+1}",
+
         "emergency_detected": emergency_detected,
-        "emergency_lane": selected_lane if emergency_detected else None
+
+        "emergency_lane":
+
+            f"Lane {emergency_lane+1}"
+
+            if emergency_lane is not None
+
+            else None,
+
+        "reason": reason,
+
+        "timer": timer,
+
+        # ==========================================
+        # OVERRIDE STATUS
+        # ==========================================
+
+        "manual_override": manual_override,
+
+        "override_lane": override_lane,
+
+        "override_reason": override_reason
+
     })
 
-# =========================
-# ▶️ RUN
-# =========================
+
+# ==========================================
+# MANUAL REFRESH API
+# ==========================================
+
+@app.route("/manual_refresh")
+def manual_refresh():
+    print("DEBUG: manual_refresh called in app.py")
+    return process()
+
+
+@app.route("/test-ui")
+def test_ui():
+    return render_template("dashboard_test.html")
+# ==========================================
+# RUN APP
+# ==========================================
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+
+    app.run(debug=True)

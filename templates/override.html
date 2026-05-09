@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/override.css') }}">
+
+<div class="override-container">
+
+    <!-- HEADER -->
+    <div class="override-header">
+        <h1>🚨 Priority Override System</h1>
+        <p>Administrative Traffic Command Center</p>
+    </div>
+
+    <!-- SYSTEM STATUS -->
+    <div class="system-status" id="systemStatus">
+        🟢 AI AUTOMATIC MODE ACTIVE
+    </div>
+
+    <!-- OVERRIDE PANEL -->
+    <div class="override-panel">
+
+        <h2>Select Priority Lane</h2>
+
+        <!-- LANE CARDS -->
+        <div class="lane-grid">
+
+            <div class="lane-card" data-lane="0">
+                <h3>Lane 1</h3>
+                <div class="signal red" id="signal0"></div>
+                <p>Status: <span id="laneStatus0">RED</span></p>
+            </div>
+
+            <div class="lane-card" data-lane="1">
+                <h3>Lane 2</h3>
+                <div class="signal red" id="signal1"></div>
+                <p>Status: <span id="laneStatus1">RED</span></p>
+            </div>
+
+            <div class="lane-card" data-lane="2">
+                <h3>Lane 3</h3>
+                <div class="signal red" id="signal2"></div>
+                <p>Status: <span id="laneStatus2">RED</span></p>
+            </div>
+
+        </div>
+
+        <!-- REASON DROPDOWN -->
+        <div class="reason-section">
+
+            <label for="overrideReason">Override Reason</label>
+
+            <select id="overrideReason">
+                <option value="VIP Movement">VIP Movement</option>
+                <option value="Ambulance">Ambulance</option>
+                <option value="Fire Brigade">Fire Brigade</option>
+                <option value="Police Convoy">Police Convoy</option>
+                <option value="Emergency Clearance">Emergency Clearance</option>
+                <option value="Manual Testing">Manual Testing</option>
+            </select>
+
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="button-group">
+
+            <button id="activateBtn">
+                ACTIVATE PRIORITY GREEN
+            </button>
+
+            <button id="disableBtn">
+                DISABLE OVERRIDE
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- OVERRIDE ALERT -->
+    <div class="override-alert hidden" id="overrideAlert">
+        🚨 PRIORITY OVERRIDE ACTIVE
+    </div>
+
+    <!-- COMMAND LOGS -->
+    <div class="logs-panel">
+
+        <h2>Command Logs</h2>
+
+        <div class="logs-container" id="logsContainer">
+
+            <div class="log-entry">
+                System initialized...
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/override.js') }}"></script>
+
+{% endblock %}
