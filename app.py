@@ -15,7 +15,7 @@ app = Flask(__name__)
 # ==========================================
 
 vehicle_model = YOLO("yolov8n.pt")
-ambulance_model = YOLO("runs/detect/train4/weights/best.pt")
+ambulance_model = YOLO("model/best.pt")
 
 
 # ==========================================
