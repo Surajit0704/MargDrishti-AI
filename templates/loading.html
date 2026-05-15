@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MargDrishti AI - Initialization</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;700;800;900&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface": "#0e1416",
+                        "surface-dim": "#0e1416",
+                        "surface-bright": "#343a3c",
+                        "surface-container-lowest": "#090f11",
+                        "surface-container-low": "#171d1e",
+                        "surface-container": "#1b2122",
+                        "surface-container-high": "#252b2d",
+                        "surface-container-highest": "#303638",
+                        "on-surface": "#dee3e6",
+                        "on-surface-variant": "#bcc9cd",
+                        "inverse-surface": "#dee3e6",
+                        "inverse-on-surface": "#2b3133",
+                        "outline": "#869397",
+                        "outline-variant": "#3d494c",
+                        "surface-tint": "#4cd7f6",
+                        "primary": "#4cd7f6",
+                        "on-primary": "#003640",
+                        "primary-container": "#06b6d4",
+                        "on-primary-container": "#00424f",
+                        "inverse-primary": "#00687a",
+                        "secondary": "#4ae176",
+                        "on-secondary": "#003915",
+                        "secondary-container": "#00b954",
+                        "on-secondary-container": "#004119",
+                        "tertiary": "#ffb873",
+                        "on-tertiary": "#4b2800",
+                        "tertiary-container": "#e89337",
+                        "on-tertiary-container": "#5b3200",
+                        "error": "#ffb4ab",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#acedff",
+                        "primary-fixed-dim": "#4cd7f6",
+                        "on-primary-fixed": "#001f26",
+                        "on-primary-fixed-variant": "#004e5c",
+                        "secondary-fixed": "#6bff8f",
+                        "secondary-fixed-dim": "#4ae176",
+                        "on-secondary-fixed": "#002109",
+                        "on-secondary-fixed-variant": "#005321",
+                        "tertiary-fixed": "#ffdcbf",
+                        "tertiary-fixed-dim": "#ffb873",
+                        "on-tertiary-fixed": "#2d1600",
+                        "on-tertiary-fixed-variant": "#6a3b00",
+                        "background": "#0e1416",
+                        "on-background": "#dee3e6",
+                        "surface-variant": "#303638"
+                    },
+                    fontFamily: {
+                        "headline": ["Fira Sans", "sans-serif"],
+                        "display": ["Fira Sans", "sans-serif"],
+                        "body": ["Fira Sans", "sans-serif"],
+                        "label": ["Space Mono", "monospace"]
+                    },
+                    backgroundImage: {
+                        'radial-midnight': 'radial-gradient(circle at center, rgba(10, 15, 28, 0.4), rgba(0, 0, 0, 0.8))',
+                        'hero-gradient': 'linear-gradient(90deg, #06b6d4, #22c55e)'
+                    },
+                    boxShadow: {
+                        'glow-cyan': '0 0 20px rgba(6, 182, 212, 0.5)',
+                        'glow-red': '0 0 30px #ff3b3b, inset 0 0 10px #ff3b3b',
+                        'glow-yellow': '0 0 30px #ffff00, inset 0 0 10px #ffff00',
+                        'glow-green': '0 0 30px #22c55e, inset 0 0 10px #22c55e',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+                    },
+                    animation: {
+                        'spin-slow': 'spin 12s linear infinite',
+                        'spin-reverse': 'spin 15s linear infinite reverse',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'text-cycle': 'text-cycle 8s steps(4) infinite',
+                        'progress': 'progress 5s ease-out forwards',
+                        'fade-out': 'fade-out 1s ease-in forwards 5s'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        'pulse-glow': {
+                            '0%, 100%': { opacity: 1, textShadow: '0 0 20px rgba(6,182,212,0.8)' },
+                            '50%': { opacity: .7, textShadow: '0 0 10px rgba(6,182,212,0.4)' },
+                        },
+                        'text-cycle': {
+                            '0%, 24.9%': { content: '"Connecting AI Cameras..."' },
+                            '25%, 49.9%': { content: '"Optimizing Traffic Flow..."' },
+                            '50%, 74.9%': { content: '"Initializing YOLO Engine..."' },
+                            '75%, 100%': { content: '"Syncing Smart Signals..."' }
+                        },
+                        'progress': {
+                            '0%': { width: '0%' },
+                            '100%': { width: '100%' }
+                        },
+                        'fade-out': {
+                            '0%': { opacity: 1, transform: 'scale(1)' },
+                            '100%': { opacity: 0, transform: 'scale(1.1)', pointerEvents: 'none' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .bg-cinematic {
+            /* Prioritizes a local Flask static asset, falls back to the external image, and has a dark fallback */
+            background-color: #090f11;
+            background-image: url("{{ url_for('static', filename='backgrounds/loading_bg.jpg') }}"), url('https://lh3.googleusercontent.com/aida-public/AB6AXuBkJX0s_U3IXDUblz0cU3GuN9_VAvh4_yXTwaMlu-km11o59G14rXlbVcDeCV9oZHemcdb_TgBcHtnKqUbLDOw04KCtCXlm77jHwwyCcU35RTNNYtW3HjtxTYiVDF_kxnNzuFb1tZ_03YpmgqiM4DZoFPwOyoSWRsdlIqE1FSzTi7n30qhOVXMUk4Du-pi1vUAljG7WjFv442tpgm1smFSsFkYJ1zLXk_mmKDo8W8H0Y78QByOp0AE1ZyliyDaOxWPqGxIZtQgkQ2c');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Traffic Light Sequence */
+        @keyframes seq-red {
+            0%, 25% { opacity: 1; box-shadow: 0 0 30px #ff3b3b, inset 0 0 10px #ff3b3b; }
+            30%, 100% { opacity: 0.1; box-shadow: none; }
+        }
+        @keyframes seq-yellow {
+            0%, 25% { opacity: 0.1; box-shadow: none; }
+            30%, 55% { opacity: 1; box-shadow: 0 0 30px #ffff00, inset 0 0 10px #ffff00; }
+            60%, 100% { opacity: 0.1; box-shadow: none; }
+        }
+        @keyframes seq-green {
+            0%, 55% { opacity: 0.1; box-shadow: none; }
+            60%, 95% { opacity: 1; box-shadow: 0 0 30px #22c55e, inset 0 0 10px #22c55e; }
+            100% { opacity: 0.1; box-shadow: none; }
+        }
+        
+        .light-red { animation: seq-red 4s infinite; background-color: #ff3b3b; }
+        .light-yellow { animation: seq-yellow 4s infinite; background-color: #ffff00; }
+        .light-green { animation: seq-green 4s infinite; background-color: #22c55e; }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(14, 20, 22, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 3D Housing */
+        .traffic-housing {
+            background: linear-gradient(145deg, #1f2527, #151d1f);
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.5), 
+                       -5px -5px 15px rgba(255,255,255,0.05),
+                       inset 0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        /* Dynamic Text */
+        .dynamic-text::after {
+            content: "Connecting AI Cameras...";
+            animation: text-cycle 8s infinite;
+        }
+
+        /* Particles & Streaks */
+        @keyframes particle-up {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #4cd7f6;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #4cd7f6;
+        }
+        .particle:nth-child(1) { left: 10%; animation: particle-up 4s infinite 0.2s; }
+        .particle:nth-child(2) { left: 30%; animation: particle-up 6s infinite 1.5s; }
+        .particle:nth-child(3) { left: 50%; animation: particle-up 5s infinite 0.8s; }
+        .particle:nth-child(4) { left: 70%; animation: particle-up 7s infinite 2.1s; }
+        .particle:nth-child(5) { left: 90%; animation: particle-up 4.5s infinite 0.5s; }
+
+        .light-streak {
+            position: absolute;
+            width: 2px;
+            height: 150px;
+            background: linear-gradient(to bottom, transparent, #4cd7f6, transparent);
+            opacity: 0.3;
+        }
+        @keyframes streak-fall {
+            0% { transform: translateY(-150px); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+        .light-streak:nth-child(6) { left: 20%; animation: streak-fall 3s infinite 0s; }
+        .light-streak:nth-child(7) { left: 80%; animation: streak-fall 4s infinite 1.2s; }
+        
+        /* Transition Container */
+        .boot-sequence {
+            animation: fade-out 0.8s ease-in forwards 4.8s; /* Smoother, slightly earlier fade */
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen overflow-hidden relative">
+<!-- Cinematic Background -->
+<div class="absolute inset-0 bg-cinematic filter blur-sm scale-105 z-0 transition-transform duration-[6000ms] ease-out transform hover:scale-100"></div>
+<div class="absolute inset-0 bg-radial-midnight z-0"></div>
+<!-- Particles & Cinematic Effects -->
+<div class="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="particle"></div>
+<div class="light-streak"></div>
+<div class="light-streak"></div>
+</div>
+<!-- Main Content Container -->
+<main class="boot-sequence relative z-10 flex flex-col items-center justify-between min-h-screen w-full px-6 py-12">
+<!-- Header Section -->
+<div class="text-center mt-8 flex flex-col items-center animate-float">
+<span class="material-symbols-outlined text-[3rem] text-primary-container mb-4 opacity-80" style="font-variation-settings: 'FILL' 1;">
+                radar
+            </span>
+<h1 class="font-headline font-extrabold text-[56px] leading-tight tracking-[3px] bg-hero-gradient text-gradient mb-2 drop-shadow-lg animate-pulse-glow">
+                MargDrishti AI
+            </h1>
+<p class="font-label text-primary-fixed-dim text-sm tracking-[0.3em] uppercase opacity-80 font-light">
+                Initializing Smart Traffic Intelligence...
+            </p>
+</div>
+<!-- Center Loading/Traffic Module -->
+<div class="relative flex flex-col items-center my-auto">
+<!-- Rotating HUD Rings -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-primary/20 rounded-full animate-spin-slow border-t-primary/60 border-b-primary/60"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 border border-secondary/10 rounded-full animate-spin-reverse border-l-secondary/40 border-r-secondary/40 border-dashed"></div>
+<!-- Traffic Light Housing (3D) -->
+<div class="traffic-housing p-5 rounded-3xl flex flex-col gap-6 items-center shadow-glass relative z-10 before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-to-br before:from-white/10 before:to-transparent before:pointer-events-none">
+<!-- Lens Cover Reflections -->
+<div class="absolute top-8 left-6 w-8 h-12 bg-white/5 rounded-full blur-sm rotate-12"></div>
+<div class="flex flex-col gap-5 bg-surface-container-lowest/80 p-5 rounded-2xl border border-surface-container-low shadow-inner">
+<div class="relative w-[36px] h-[36px] rounded-full bg-[#ff3b3b] opacity-10 light-red transition-all duration-300 before:absolute before:inset-1 before:rounded-full before:bg-gradient-to-br before:from-white/40 before:to-transparent"></div>
+<div class="relative w-[36px] h-[36px] rounded-full bg-[#ffff00] opacity-10 light-yellow transition-all duration-300 before:absolute before:inset-1 before:rounded-full before:bg-gradient-to-br before:from-white/40 before:to-transparent"></div>
+<div class="relative w-[36px] h-[36px] rounded-full bg-[#22c55e] opacity-10 light-green transition-all duration-300 before:absolute before:inset-1 before:rounded-full before:bg-gradient-to-br before:from-white/40 before:to-transparent"></div>
+</div>
+</div>
+<!-- Mount Base -->
+<div class="w-4 h-16 bg-gradient-to-b from-surface-container-highest to-surface-container-lowest border-x border-outline-variant shadow-lg z-0"></div>
+<!-- Premium Progress Module -->
+<div class="mt-8 text-center flex flex-col items-center gap-3 w-80 glass-panel p-4 rounded-xl">
+<div class="flex justify-between w-full font-label text-xs font-bold text-primary-fixed-dim uppercase tracking-wider">
+<span class="dynamic-text"></span>
+<span class="text-secondary-fixed">100%</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden shadow-inner">
+<div class="h-full bg-hero-gradient w-0 shadow-glow-cyan animate-progress"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Info Panel -->
+<div class="w-full max-w-4xl glass-panel rounded-2xl p-6 grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+<div class="flex flex-col items-center text-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-primary text-2xl drop-shadow-glow-cyan">visibility</span>
+<span class="font-label text-xs uppercase tracking-wider text-on-surface">AI Vision</span>
+</div>
+<div class="flex flex-col items-center text-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-secondary text-2xl drop-shadow-glow-green">monitoring</span>
+<span class="font-label text-xs uppercase tracking-wider text-on-surface">Traffic Analysis</span>
+</div>
+<div class="flex flex-col items-center text-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-tertiary text-2xl shadow-glow-yellow">tune</span>
+<span class="font-label text-xs uppercase tracking-wider text-on-surface">Optimization</span>
+</div>
+<div class="flex flex-col items-center text-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-primary-container text-2xl drop-shadow-glow-cyan">route</span>
+<span class="font-label text-xs uppercase tracking-wider text-on-surface">Safe Routes</span>
+</div>
+</div>
+<!-- System Logs (Kept but styled to match) -->
+<div class="absolute bottom-6 left-6 flex flex-col gap-1 opacity-40 font-label text-[10px] tracking-wider pointer-events-none">
+<div class="text-on-surface-variant">&gt; BINDING YOLOv8 TENSORS [OK]</div>
+<div class="text-on-surface-variant">&gt; ALLOCATING GPU MEMORY [OK]</div>
+<div class="text-primary-container">&gt; SYS_READY...</div>
+</div>
+</main>
+
+<!-- Redirect Handling Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // The progress bar takes 5s. Fade out starts at 4.8s and ends at 5.6s.
+        // Redirect precisely when the screen is dark (around 5.5s) for a seamless transition.
+        setTimeout(() => {
+            // Ensure background is solid dark before navigation to avoid flashes
+            document.body.style.backgroundColor = "#090f11";
+            document.body.style.backgroundImage = "none";
+            document.body.innerHTML = ""; 
+            
+            // Redirect using Flask routing
+            window.location.replace("{{ url_for('dashboard') }}");
+        }, 5500); 
+    });
+</script>
+</body></html>

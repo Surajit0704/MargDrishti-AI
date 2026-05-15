@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="view-transition" content="same-origin" />
+<title>MargDrishti AI - Smart City Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;700;800&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed": "#6bff8f",
+                      "secondary-container": "#00b954",
+                      "on-primary-fixed-variant": "#004e5c",
+                      "on-surface": "#dee3e6",
+                      "surface-dim": "#0e1416",
+                      "secondary-fixed-dim": "#4ae176",
+                      "primary-fixed-dim": "#4cd7f6",
+                      "inverse-on-surface": "#2b3133",
+                      "inverse-primary": "#00687a",
+                      "surface": "#0e1416",
+                      "tertiary": "#ffb873",
+                      "tertiary-container": "#e89337",
+                      "primary-container": "#06b6d4",
+                      "on-secondary-fixed": "#002109",
+                      "primary": "#4cd7f6",
+                      "outline-variant": "#3d494c",
+                      "background": "#0e1416",
+                      "on-secondary-fixed-variant": "#005321",
+                      "surface-tint": "#4cd7f6",
+                      "on-primary-container": "#00424f",
+                      "on-surface-variant": "#bcc9cd",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#1b2122",
+                      "on-primary-fixed": "#001f26",
+                      "error": "#ffb4ab",
+                      "tertiary-fixed": "#ffdcbf",
+                      "on-tertiary-fixed": "#2d1600",
+                      "surface-container-high": "#252b2d",
+                      "on-tertiary": "#4b2800",
+                      "surface-variant": "#303638",
+                      "surface-container-highest": "#303638",
+                      "on-secondary": "#003915",
+                      "outline": "#869397",
+                      "inverse-surface": "#dee3e6",
+                      "tertiary-fixed-dim": "#ffb873",
+                      "surface-bright": "#343a3c",
+                      "secondary": "#4ae176",
+                      "on-background": "#dee3e6",
+                      "on-tertiary-fixed-variant": "#6a3b00",
+                      "on-primary": "#003640",
+                      "on-error": "#690005",
+                      "surface-container-low": "#171d1e",
+                      "on-secondary-container": "#004119",
+                      "on-tertiary-container": "#5b3200",
+                      "error-container": "#93000a",
+                      "primary-fixed": "#acedff",
+                      "surface-container-lowest": "#090f11",
+                      
+                      "bg-midnight": "#0a0f1c",
+                      "cyan-electric": "#00e5ff",
+                      "green-neon": "#00ff99",
+                      "red-signal": "#ff3b3b"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.5rem",
+                      "lg": "1rem",
+                      "xl": "1.5rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Fira Sans"],
+                      "display": ["Fira Sans"],
+                      "body": ["Fira Sans"],
+                      "label": ["Space Mono"]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        /* Custom glow utilities based on design system */
+        .glow-cyan { box-shadow: 0 0 20px rgba(6,182,212,0.4); }
+        .glow-green { box-shadow: 0 0 30px rgba(34,197,94,0.7); }
+        .glow-red { box-shadow: 0 0 35px red; }
+        .glow-alert { box-shadow: 0 0 25px rgba(255,0,0,0.8); }
+        
+        .bg-radial-space {
+            background: radial-gradient(circle at top, #0a0f1c, #000);
+        }
+        
+        .glass-panel {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 18px;
+        }
+
+        .log-entry {
+            background: #111827;
+            border-left: 4px solid #00e5ff;
+            border-radius: 10px;
+        }
+        
+        /* Map specific styles */
+        .map-line-cyan { stroke: #06b6d4; stroke-width: 2; opacity: 0.6; }
+        .map-line-green { stroke: #22c55e; stroke-width: 3; filter: drop-shadow(0 0 5px #22c55e); }
+        .map-line-orange { stroke: #f97316; stroke-width: 3; filter: drop-shadow(0 0 5px #f97316); }
+        .map-line-red { stroke: #ff3b3b; stroke-width: 4; filter: drop-shadow(0 0 8px #ff3b3b); }
+        
+        .map-node-cyan { fill: #00e5ff; filter: drop-shadow(0 0 4px #00e5ff); }
+        .map-node-green { fill: #00ff99; filter: drop-shadow(0 0 10px #00ff99); }
+    </style>
+</head>
+<body class="bg-radial-space text-on-surface font-body h-screen overflow-hidden flex selection:bg-primary/30 selection:text-primary-fixed">
+<!-- JSON Anchor: SideNavBar -->
+<!-- Content exactly as provided, styles applied from style_* keys -->
+<nav class="w-[220px] h-screen fixed left-0 top-0 border-r border-outline-variant bg-surface-container-lowest dark:bg-surface-container-lowest flex flex-col h-full py-6 px-4 z-50">
+<!-- Header -->
+<div class="mb-8">
+<h1 class="font-display text-2xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary mb-1">MargDrishti AI</h1>
+<div class="text-on-surface-variant font-label text-xs uppercase tracking-wider flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#4ae176]"></span>
+                City Grid Node 04
+            </div>
+</div>
+<!-- Main Tabs -->
+<div class="flex flex-col gap-2 flex-grow">
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 transition-all duration-300 ease-in-out font-body text-body-ui" href="/dashboard">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Command Center</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg bg-primary/20 text-primary border-r-4 border-primary transition-all duration-300 ease-in-out hover:bg-primary/10 font-body text-body-ui" href="/city-map">
+<span class="material-symbols-outlined shadow-[0_0_8px_#4cd7f6] text-primary" data-icon="map">map</span>
+<span class="drop-shadow-[0_0_8px_#4cd7f6] text-primary">Smart City Map</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 transition-all duration-300 ease-in-out font-body text-body-ui" href="/dashboard">
+<span class="material-symbols-outlined" data-icon="videocam">videocam</span>
+<span>Live Feeds</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 transition-all duration-300 ease-in-out hover:bg-primary/10 font-body text-body-ui" href="#">
+<span class="material-symbols-outlined" data-icon="priority_high">priority_high</span>
+<span>Priority Override</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 transition-all duration-300 ease-in-out hover:bg-primary/10 font-body text-body-ui" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span>AI Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-3 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 transition-all duration-300 ease-in-out hover:bg-primary/10 font-body text-body-ui" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span>System Logs</span>
+</a>
+</div>
+<!-- CTA -->
+<div class="mt-auto mb-6">
+<button class="w-full py-3 rounded-lg bg-error-container/20 text-error border border-error/50 font-bold tracking-wider hover:bg-error/20 transition-colors shadow-[0_0_15px_rgba(255,59,59,0.3)]">
+                EMERGENCY STOP
+            </button>
+</div>
+<!-- Footer Tabs -->
+<div class="flex flex-col gap-1 border-t border-outline-variant pt-4">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 transition-all duration-300 ease-in-out font-body text-body-ui text-sm" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/10 transition-all duration-300 ease-in-out font-body text-body-ui text-sm" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="help">help</span>
+<span>Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area (Fluid width next to 220px sidebar) -->
+<main class="ml-[220px] flex-1 h-screen flex flex-col relative overflow-hidden">
+<!-- Top App Bar (Custom for map context, anchored slightly to JSON but contextual) -->
+<header class="h-20 flex justify-between items-center px-8 z-40 bg-surface/40 backdrop-blur-md border-b border-outline-variant shrink-0">
+<div>
+<h1 class="font-headline text-3xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary uppercase">SMART CITY COMMAND GRID</h1>
+<p class="font-label text-on-surface-variant text-sm tracking-wide">AI-Powered Traffic Orchestration System</p>
+</div>
+<div class="flex items-center gap-6">
+<!-- Status Banner -->
+<div class="flex items-center gap-3 bg-surface-container-high px-4 py-2 rounded-full border border-secondary shadow-[0_0_10px_rgba(74,225,118,0.3)]">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary shadow-[0_0_8px_#4ae176]"></span>
+<span class="font-label text-secondary text-sm tracking-widest font-bold">SYSTEM NOMINAL</span>
+</div>
+<div class="flex gap-4">
+<button class="p-2 rounded-full hover:bg-surface-variant transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-variant transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Dynamic Content Grid -->
+<div class="flex-1 flex overflow-hidden p-6 gap-6">
+<!-- Center: Holographic Map Canvas -->
+<div class="flex-1 relative glass-panel flex flex-col overflow-hidden">
+<!-- Green Corridor Active Banner -->
+<div id="emergencyBanner" class="opacity-0 transition-opacity duration-500 absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-secondary-container/20 border-2 border-secondary px-6 py-2 rounded-full shadow-[0_0_20px_#00ff99] flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary shadow-[0_0_10px_#00ff99]" data-icon="emergency">emergency</span>
+<span class="font-headline font-bold text-secondary tracking-widest text-lg">GREEN CORRIDOR ACTIVATED</span>
+</div>
+<!-- Overlay UI elements -->
+<div class="absolute bottom-6 left-6 z-20 flex gap-4">
+<div class="glass-panel p-3 flex flex-col gap-2 font-label text-xs text-on-surface-variant">
+<div class="flex items-center gap-2"><div class="w-4 h-1 bg-primary"></div> AI Normal</div>
+<div class="flex items-center gap-2"><div class="w-4 h-1 bg-error shadow-[0_0_5px_red]"></div> High Density</div>
+<div class="flex items-center gap-2"><div class="w-4 h-1.5 bg-secondary shadow-[0_0_8px_#00ff99]"></div> Active Override</div>
+</div>
+</div>
+<!-- The Map SVG representation -->
+<div class="flex-1 w-full h-full relative bg-[#050a14] rounded-xl overflow-hidden shadow-inner">
+<!-- Subtle scanlines overlay -->
+<div class="absolute inset-0 pointer-events-none opacity-20" style="background-image: repeating-linear-gradient(to bottom, transparent, transparent 2px, #00e5ff 3px, #00e5ff 4px); mix-blend-mode: overlay;"></div>
+<svg class="w-full h-full" preserveaspectratio="xMidYMid slice" viewbox="0 0 1000 800">
+<defs>
+<filter id="glow-cyan"><fegaussianblur result="coloredBlur" stddeviation="2"></fegaussianblur><femerge><femergenode in="coloredBlur"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge></filter>
+<filter id="glow-green"><fegaussianblur result="coloredBlur" stddeviation="4"></fegaussianblur><femerge><femergenode in="coloredBlur"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge></filter>
+<filter id="glow-red"><fegaussianblur result="coloredBlur" stddeviation="3"></fegaussianblur><femerge><femergenode in="coloredBlur"></femergenode><femergenode in="SourceGraphic"></femergenode></femerge></filter>
+</defs>
+<!-- Base Grid/Network (Cyan) -->
+<path class="map-line-cyan" d="M100,100 L900,100 M100,300 L900,300 M100,500 L900,500 M100,700 L900,700" filter="url(#glow-cyan)"></path>
+<path class="map-line-cyan" d="M200,50 L200,750 M400,50 L400,750 M600,50 L600,750 M800,50 L800,750" filter="url(#glow-cyan)"></path>
+<path class="map-line-cyan" d="M100,100 L400,300 L600,100" filter="url(#glow-cyan)"></path>
+<!-- Dynamic Lane Paths -->
+<path id="lanePath-0" class="map-line-cyan transition-all duration-500" d="M400,50 L400,300"></path>
+<path id="lanePath-1" class="map-line-cyan transition-all duration-500" d="M900,300 L600,300"></path>
+<path id="lanePath-2" class="map-line-cyan transition-all duration-500" d="M600,750 L600,500"></path>
+<path id="lanePath-3" class="map-line-cyan transition-all duration-500" d="M100,500 L400,500"></path>
+
+<!-- Dynamic Lane Nodes (Intersections) -->
+<circle id="laneNode-0" cx="400" cy="300" class="map-node-cyan transition-all duration-500" r="6"></circle>
+<circle id="laneNode-1" cx="600" cy="300" class="map-node-cyan transition-all duration-500" r="6"></circle>
+<circle id="laneNode-2" cx="600" cy="500" class="map-node-cyan transition-all duration-500" r="6"></circle>
+<circle id="laneNode-3" cx="400" cy="500" class="map-node-cyan transition-all duration-500" r="6"></circle>
+
+<!-- GREEN CORRIDOR MODE (Hidden by default) -->
+<path id="emergencyRoute" class="map-line-green opacity-0 transition-opacity duration-500" d="M100,700 L200,700 L200,300 L400,100 L800,100 L800,500 M800,500 L900,500" filter="url(#glow-green)"></path>
+
+<!-- Ambulance Icon Marker on Green Route -->
+<g id="ambulanceMarker" class="opacity-0 transition-opacity duration-500" transform="translate(300, 200)">
+<circle cx="0" cy="0" fill="#050a14" filter="url(#glow-green)" r="16" stroke="#00ff99" stroke-width="2"></circle>
+<text fill="#00ff99" font-family="Material Symbols Outlined" font-size="18" x="-9" y="6">ambulance</text>
+</g>
+<!-- Standard Intersections (Cyan Nodes) -->
+<circle class="map-node-cyan" cx="600" cy="100" r="4"></circle>
+<circle class="map-node-cyan" cx="600" cy="700" r="4"></circle>
+<circle class="map-node-cyan" cx="800" cy="300" r="4"></circle>
+</svg>
+</div>
+</div>
+<!-- Right: AI Analytics & Intelligence Panel -->
+<div class="w-[340px] flex flex-col gap-6 shrink-0 overflow-y-auto pr-2 custom-scrollbar">
+<!-- Metrics Grid -->
+<div class="grid grid-cols-2 gap-4">
+<div class="glass-panel p-4 flex flex-col gap-1">
+<span class="font-label text-on-surface-variant text-xs uppercase">Active Nodes</span>
+<span class="font-headline text-2xl font-bold text-primary">142</span>
+</div>
+<div class="glass-panel p-4 flex flex-col gap-1">
+<span class="font-label text-on-surface-variant text-xs uppercase">Sys Latency</span>
+<span class="font-headline text-2xl font-bold text-secondary">12<span class="text-sm font-normal ml-1 text-on-surface-variant">ms</span></span>
+</div>
+<div class="glass-panel p-4 flex flex-col gap-1 col-span-2 relative overflow-hidden border-error/30">
+<div class="absolute right-0 top-0 w-2 h-full bg-error shadow-[0_0_10px_red]"></div>
+<span class="font-label text-on-surface-variant text-xs uppercase">Grid Congestion</span>
+<div class="flex items-end justify-between">
+<span id="gridCongestionPercent" class="font-headline text-3xl font-bold text-error">0%</span>
+<span class="font-label text-xs text-error mb-1 border border-error px-2 py-0.5 rounded">LIVE</span>
+</div>
+</div>
+</div>
+<!-- AI Route Intelligence Card -->
+<div class="glass-panel p-5 bg-[#0f172a] flex flex-col gap-4">
+<div class="flex justify-between items-center border-b border-outline-variant/50 pb-3">
+<h3 class="font-headline text-cyan-electric font-bold tracking-wide">ROUTE INTELLIGENCE</h3>
+<span class="material-symbols-outlined text-cyan-electric" data-icon="route">route</span>
+</div>
+<div>
+<div class="flex justify-between items-center mb-1">
+<span class="font-label text-xs text-on-surface-variant">Primary Target</span>
+<span class="font-label text-xs text-secondary font-bold">Sector 4 Hospital</span>
+</div>
+<div class="bg-surface-container h-2 rounded-full overflow-hidden mt-2">
+<div class="bg-gradient-to-r from-primary to-secondary h-full w-[94%] shadow-[0_0_10px_#4ae176]"></div>
+</div>
+<div class="flex justify-between mt-1">
+<span class="font-label text-[10px] text-on-surface-variant">Confidence Matrix</span>
+<span class="font-label text-[10px] text-secondary">94% AI Lock</span>
+</div>
+</div>
+<div class="flex gap-2 mt-2">
+<button class="flex-1 bg-[#111827] border border-outline-variant hover:border-primary transition-colors py-2 rounded text-xs font-bold text-on-surface flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="refresh">refresh</span>
+                            RECALC
+                        </button>
+</div>
+</div>
+<!-- Live Event Timeline (Logs) -->
+<div class="glass-panel p-5 bg-[#0f172a] flex-1 flex flex-col min-h-[300px]">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-headline text-cyan-electric font-bold tracking-wide">LIVE EVENT LOG</h3>
+<div class="flex gap-1">
+<div class="w-1.5 h-1.5 bg-primary rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-primary/50 rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-primary/20 rounded-full"></div>
+</div>
+</div>
+<div id="eventLogsContainer" class="flex flex-col gap-3 font-label text-xs overflow-y-auto pr-2">
+<div class="log-entry p-3 border-l-4 border-secondary shadow-[0_0_10px_rgba(74,225,118,0.1)]">
+<div class="flex justify-between text-on-surface-variant mb-1 text-[10px]">
+<span>SYS.OP.842</span>
+<span>14:02:11</span>
+</div>
+<div class="text-secondary font-bold">PRIORITY OVERRIDE GRANTED</div>
+<div class="text-on-surface mt-1">Green Corridor established: Node 4 → Sector 4 Hospital. ETA 4m 12s.</div>
+</div>
+<div class="log-entry p-3 border-l-4 border-error">
+<div class="flex justify-between text-on-surface-variant mb-1 text-[10px]">
+<span>YOLO.VISION.C3</span>
+<span>14:01:58</span>
+</div>
+<div class="text-error font-bold">EMERGENCY VEHICLE DETECTED</div>
+<div class="text-on-surface mt-1">Ambulance spotted on Lane A. Triggering preemptive signal shift.</div>
+</div>
+<div class="log-entry p-3">
+<div class="flex justify-between text-on-surface-variant mb-1 text-[10px]">
+<span>NODE.SYNC.04</span>
+<span>14:00:05</span>
+</div>
+<div class="text-primary font-bold">ROUTINE CYCLE COMPLETE</div>
+<div class="text-on-surface mt-1">Density calculated. Shifting priority to East-West corridor.</div>
+</div>
+<div class="log-entry p-3 opacity-60">
+<div class="flex justify-between text-on-surface-variant mb-1 text-[10px]">
+<span>YOLO.VISION.C1</span>
+<span>13:58:22</span>
+</div>
+<div class="text-primary font-bold">OBJECT TRACKING OK</div>
+<div class="text-on-surface mt-1">Processed 4,210 frames. No anomalies detected.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<style>
+        /* Custom scrollbar for glass panels */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #06b6d4;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #00e5ff;
+        }
+    </style>
+</style>
+
+<script>
+    // Integration Logic for Smart City Command Grid
+    const logsContainer = document.getElementById('eventLogsContainer');
+    
+    // Add Event Log
+    function addEventLog(source, type, title, message) {
+        if (!logsContainer) return;
+        const log = document.createElement("div");
+        const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+        
+        let borderColor = 'border-primary';
+        let textColor = 'text-primary';
+        
+        if (type === 'error') {
+            borderColor = 'border-error';
+            textColor = 'text-error';
+        } else if (type === 'success') {
+            borderColor = 'border-secondary';
+            textColor = 'text-secondary';
+            log.style.boxShadow = '0 0 10px rgba(74,225,118,0.1)';
+        }
+        
+        log.className = `log-entry p-3 border-l-4 ${borderColor} bg-[#111827] rounded-md mb-2 animate-pulse-glow`;
+        log.innerHTML = `
+            <div class="flex justify-between text-on-surface-variant mb-1 text-[10px]">
+                <span>${source}</span>
+                <span>${time}</span>
+            </div>
+            <div class="${textColor} font-bold">${title}</div>
+            <div class="text-on-surface mt-1">${message}</div>
+        `;
+        
+        logsContainer.prepend(log);
+        
+        // Keep only last 10 logs
+        if (logsContainer.children.length > 10) {
+            logsContainer.removeChild(logsContainer.lastChild);
+        }
+    }
+
+    let lastEmergencyState = false;
+
+    async function pollTrafficState() {
+        try {
+            const res = await fetch('/city-map-data');
+            if (!res.ok) return;
+            const data = await res.json();
+            
+            // 1. Update Map Lanes (Colors & Signals)
+            let totalDensity = 0;
+            const laneCount = Object.keys(data.density).length || 4; // Default to 4
+            
+            for (let i = 0; i < laneCount; i++) {
+                const densityLevel = data.density[`Lane ${i+1}`] || "Low";
+                const signal = data.signal_status[`Lane ${i+1}`] || "Red";
+                const count = data.counts[`Lane ${i+1}`] || 0;
+                totalDensity += count;
+                
+                const path = document.getElementById(`lanePath-${i}`);
+                const node = document.getElementById(`laneNode-${i}`);
+                
+                if (path && node) {
+                    // Update Road Congestion Color
+                    path.className.baseVal = "transition-all duration-500 ";
+                    if (densityLevel === "High") {
+                        path.className.baseVal += "map-line-red";
+                    } else if (densityLevel === "Medium") {
+                        path.className.baseVal += "map-line-orange";
+                    } else {
+                        path.className.baseVal += "map-line-cyan";
+                    }
+                    
+                    // Update Intersection Node Signal
+                    node.className.baseVal = "transition-all duration-500 ";
+                    if (signal === "Green") {
+                        node.className.baseVal += "map-node-green shadow-[0_0_15px_#00ff99]";
+                        node.style.fill = "#00ff99";
+                    } else {
+                        node.className.baseVal += "map-node-cyan";
+                        node.style.fill = "#ff3b3b"; // Red
+                    }
+                }
+            }
+            
+            // 2. Grid Congestion Metric
+            const congestionEl = document.getElementById('gridCongestionPercent');
+            if (congestionEl) {
+                // simple calc: max roughly 40 cars total is 100%
+                let percentage = Math.min(100, Math.round((totalDensity / 40) * 100));
+                congestionEl.innerText = percentage + "%";
+            }
+            
+            // 3. Emergency Mode (Green Corridor)
+            const banner = document.getElementById('emergencyBanner');
+            const route = document.getElementById('emergencyRoute');
+            const marker = document.getElementById('ambulanceMarker');
+            
+            if (data.emergency_detected) {
+                if (!lastEmergencyState) {
+                    addEventLog("YOLO.VISION.C3", "error", "EMERGENCY DETECTED", `Ambulance identified on ${data.emergency_lane}. Priority Green engaged.`);
+                    lastEmergencyState = true;
+                }
+                
+                banner.classList.remove('opacity-0');
+                route.classList.remove('opacity-0');
+                marker.classList.remove('opacity-0');
+                
+                // Animate ambulance moving slightly to look alive
+                marker.style.transform = `translate(${300 + Math.random()*50}px, ${200 + Math.random()*50}px)`;
+                
+            } else {
+                if (lastEmergencyState) {
+                    addEventLog("NODE.SYNC.04", "success", "EMERGENCY CLEARED", "Ambulance passed. Resuming normal AI cycle.");
+                    lastEmergencyState = false;
+                }
+                
+                banner.classList.add('opacity-0');
+                route.classList.add('opacity-0');
+                marker.classList.add('opacity-0');
+            }
+            
+        } catch (e) {
+            console.error("City Map Data Poll Error:", e);
+        }
+    }
+
+    // Initial log
+    // addEventLog("SYSTEM", "success", "GRID ONLINE", "Smart City Map synchronized with backend state.");
+
+    // Poll every 1 second
+    setInterval(pollTrafficState, 1000);
+    pollTrafficState();
+</script>
+</body></html>

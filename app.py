@@ -30,6 +30,61 @@ DATASET_PATHS = {
 
 
 # ==========================================
+# WEBCAM INTEGRATION (LANE 4)
+# ==========================================
+import threading
+import time
+
+# Initialize variables
+camera = None
+camera_started = False
+
+def start_webcam_thread():
+    global camera
+    
+    # Use DirectShow (cv2.CAP_DSHOW) backend which is the most stable for Windows
+    # and prevents the MSMF "can't grab frame" warning.
+    camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+    
+    def capture_webcam():
+        """Continuously captures frames from webcam and saves them optimally."""
+        # Ensure the static directory exists
+        os.makedirs("static", exist_ok=True)
+        last_save_time = time.time()
+        
+        while True:
+            if camera and camera.isOpened():
+                success, frame = camera.read()
+                if success:
+                    current_time = time.time()
+                    # Process and save the frame every 1.5 seconds to reduce CPU & disk I/O
+                    if current_time - last_save_time >= 1.5:
+                        try:
+                            cv2.imwrite("static/live_lane.jpg", frame)
+                        except Exception as e:
+                            print(f"Error saving webcam frame: {e}")
+                        last_save_time = current_time
+                        
+            # Sleep slightly to flush buffer without hogging the CPU core
+            time.sleep(0.03)
+
+    # Start the background thread for webcam capture
+    webcam_thread = threading.Thread(target=capture_webcam, daemon=True)
+    webcam_thread.start()
+
+@app.before_request
+def initialize_camera_once():
+    """
+    Starts the webcam thread only on the very first HTTP request.
+    This safely prevents Flask's debug mode from opening the camera twice!
+    """
+    global camera_started
+    if not camera_started:
+        start_webcam_thread()
+        camera_started = True
+
+
+# ==========================================
 # PRIORITY OVERRIDE STATE
 # ==========================================
 
@@ -37,6 +92,23 @@ manual_override = False
 override_lane = None
 override_reason = None
 lane_3_first_run = True
+
+# ==========================================
+# GLOBAL TRAFFIC STATE CACHE
+# ==========================================
+GLOBAL_TRAFFIC_STATE = {
+    "counts": {},
+    "density": {},
+    "signal_status": {},
+    "selected_lane": None,
+    "emergency_detected": False,
+    "emergency_lane": None,
+    "reason": "Initializing...",
+    "timer": 0,
+    "manual_override": False,
+    "override_lane": None,
+    "override_reason": None
+}
 
 
 # ==========================================
@@ -184,11 +256,25 @@ def choose_lane(totals, scores):
 
 
 # ==========================================
-# HOME PAGE
+# BOOT/LOADING PAGE
 # ==========================================
 
 @app.route("/")
-def index():
+@app.route("/boot")
+def boot():
+
+    return render_template(
+        "loading.html",
+        page="boot"
+    )
+
+
+# ==========================================
+# DASHBOARD PAGE
+# ==========================================
+
+@app.route("/dashboard")
+def dashboard():
 
     return render_template(
         "dashboard_test.html",
@@ -204,9 +290,32 @@ def index():
 def override():
 
     return render_template(
-        "override.html",
+        "override_new.html",
         page="override"
     )
+
+
+# ==========================================
+# CITY MAP PAGE
+# ==========================================
+
+@app.route("/city-map")
+def city_map():
+
+    return render_template(
+        "city_map.html",
+        page="city_map"
+    )
+
+
+# ==========================================
+# CITY MAP DATA API
+# ==========================================
+
+@app.route("/city-map-data")
+def city_map_data():
+    # Return cached state (excluding heavy images)
+    return jsonify(GLOBAL_TRAFFIC_STATE)
 
 
 # ==========================================
@@ -374,10 +483,14 @@ def process():
     else:
         lane_3_path = get_random_image(DATASET_PATHS["lane_3"])
 
+    # Define the path for the live webcam lane
+    lane_4_path = "static/live_lane.jpg" if os.path.exists("static/live_lane.jpg") else None
+
     lane_paths = [
         lane_1_path,
         lane_2_path,
-        lane_3_path
+        lane_3_path,
+        lane_4_path
     ]
 
     lanes = []
@@ -512,46 +625,29 @@ def process():
     ] = "Green"
 
     # ==========================================
-    # FINAL RESPONSE
+    # FINAL RESPONSE & CACHE UPDATE
     # ==========================================
-
-    return jsonify({
-
-        "lanes": lanes,
-
+    
+    global GLOBAL_TRAFFIC_STATE
+    
+    GLOBAL_TRAFFIC_STATE = {
         "counts": counts_dict,
-
         "density": density,
-
         "signal_status": signal_status,
-
         "selected_lane": f"Lane {active_lane+1}",
-
         "emergency_detected": emergency_detected,
-
-        "emergency_lane":
-
-            f"Lane {emergency_lane+1}"
-
-            if emergency_lane is not None
-
-            else None,
-
+        "emergency_lane": f"Lane {emergency_lane+1}" if emergency_lane is not None else None,
         "reason": reason,
-
         "timer": timer,
-
-        # ==========================================
-        # OVERRIDE STATUS
-        # ==========================================
-
         "manual_override": manual_override,
-
         "override_lane": override_lane,
-
         "override_reason": override_reason
+    }
 
-    })
+    response_data = dict(GLOBAL_TRAFFIC_STATE)
+    response_data["lanes"] = lanes # Add heavy images ONLY for dashboard response
+
+    return jsonify(response_data)
 
 
 # ==========================================

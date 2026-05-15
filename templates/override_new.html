@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Priority Override - MargDrishti AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;700;800&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#0e1416",
+                        "surface-dim": "#0e1416",
+                        "surface-bright": "#343a3c",
+                        "surface-container-lowest": "#090f11",
+                        "surface-container-low": "#171d1e",
+                        "surface-container": "#1b2122",
+                        "surface-container-high": "#252b2d",
+                        "surface-container-highest": "#303638",
+                        "on-surface": "#dee3e6",
+                        "on-surface-variant": "#bcc9cd",
+                        "inverse-surface": "#dee3e6",
+                        "inverse-on-surface": "#2b3133",
+                        "outline": "#869397",
+                        "outline-variant": "#3d494c",
+                        "surface-tint": "#4cd7f6",
+                        "primary": "#4cd7f6",
+                        "on-primary": "#003640",
+                        "primary-container": "#06b6d4",
+                        "on-primary-container": "#00424f",
+                        "inverse-primary": "#00687a",
+                        "secondary": "#4ae176",
+                        "on-secondary": "#003915",
+                        "secondary-container": "#00b954",
+                        "on-secondary-container": "#004119",
+                        "tertiary": "#ffb873",
+                        "on-tertiary": "#4b2800",
+                        "tertiary-container": "#e89337",
+                        "on-tertiary-container": "#5b3200",
+                        "error": "#ffb4ab",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#acedff",
+                        "primary-fixed-dim": "#4cd7f6",
+                        "on-primary-fixed": "#001f26",
+                        "on-primary-fixed-variant": "#004e5c",
+                        "secondary-fixed": "#6bff8f",
+                        "secondary-fixed-dim": "#4ae176",
+                        "on-secondary-fixed": "#002109",
+                        "on-secondary-fixed-variant": "#005321",
+                        "tertiary-fixed": "#ffdcbf",
+                        "tertiary-fixed-dim": "#ffb873",
+                        "on-tertiary-fixed": "#2d1600",
+                        "on-tertiary-fixed-variant": "#6a3b00",
+                        "background": "#0e1416",
+                        "on-background": "#dee3e6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Fira Sans", "sans-serif"],
+                        "display": ["Fira Sans", "sans-serif"],
+                        "body": ["Fira Sans", "sans-serif"],
+                        "label": ["Space Mono", "monospace"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background: radial-gradient(circle at top, #0a0f1c, #000);
+            color: #dee3e6;
+            min-height: 100vh;
+        }
+        
+        .hero-title-gradient {
+            background: linear-gradient(90deg, #06b6d4, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glow-mint {
+            box-shadow: 0 0 15px rgba(0, 255, 153, 0.4);
+        }
+
+        .glow-red {
+            box-shadow: 0 0 35px red;
+        }
+
+        .signal-orb-green {
+            background-color: #22c55e;
+            box-shadow: 0 0 18px #22c55e;
+        }
+
+        .signal-orb-red {
+            background-color: #ff3b3b;
+            box-shadow: 0 0 18px red;
+        }
+
+        .cyber-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .cyber-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.02);
+        }
+        .cyber-scrollbar::-webkit-scrollbar-thumb {
+            background: #06b6d4;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="font-body antialiased flex h-screen overflow-hidden">
+<!-- SideNavBar (Shared Component JSON Applied) -->
+<nav class="fixed left-0 top-0 h-full w-[220px] bg-[#050a14] border-r border-outline-variant flex flex-col py-[15px] z-50">
+<div class="px-[20px] mb-8">
+<h2 class="font-headline text-[16px] font-black text-[#06b6d4]">MargDrishti AI</h2>
+<div class="mt-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+<img alt="Operator Profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional operator in a dimly lit, high-tech command center. Ambient blue and cyan lighting reflects softly on their face, highlighting a focused and serious expression. The background is a blur of glowing monitors and sleek, modern dark-mode interfaces, establishing a cyberpunk, mission-critical atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQGU0faQfBR2_8EePUhK0yKasOZg6qazFq4Pzx2TEJXP1jsetAiYCADOWDmRfc4Cd9aApgLNnjUKHShaMgzcfeH0lVTNGPywvYYxVfHj03EgQKJ4qoyauJTyjZlq8t53Ku-WtmzYalr2xTeTq1DlXOgD9CAxPH-OYxHR-n9vlgdvWydTBO1D4kLtJc20TM0jeD14MtXdMhP0cNoP6YwASo2N19h7Au0RUZbiMrNK1_7lZqUxKAmC5oleOWJxWhk52MrfZjdez_bec"/>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface text-sm">Command Center</p>
+<p class="font-label text-xs text-on-surface-variant">Unit 04 - Sector 7</p>
+</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-2 px-3 overflow-y-auto cyber-scrollbar">
+<!-- Navigation Links -->
+<a class="flex items-center gap-3 px-[12px] py-[8px] rounded-[8px] text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">videocam</span>
+<span class="text-[16px]">Live Feed</span>
+</a>
+<a class="flex items-center gap-3 px-[12px] py-[8px] rounded-[8px] text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+<span class="text-[16px]">AI Logic</span>
+</a>
+<!-- Active Link: Emergency -> overriding maps to Emergency/Override intent -->
+<a class="flex items-center gap-3 px-[12px] py-[8px] rounded-[8px] bg-surface-variant text-primary border-r-4 border-primary scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px] text-[#00e5ff]">emergency</span>
+<span class="text-[16px] font-bold text-[#00e5ff]">Emergency</span>
+</a>
+<a class="flex items-center gap-3 px-[12px] py-[8px] rounded-[8px] text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">assessment</span>
+<span class="text-[16px]">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-[12px] py-[8px] rounded-[8px] text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings_input_component</span>
+<span class="text-[16px]">Diagnostics</span>
+</a>
+<div class="mt-6 px-[12px]">
+<button class="w-full py-2 px-4 rounded-[14px] bg-primary text-on-primary font-bold text-sm shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:scale-105 transition-transform">
+                    Green Corridor
+                </button>
+</div>
+</div>
+<div class="mt-auto px-3 pt-4 border-t border-outline-variant flex flex-col gap-2">
+<a class="flex items-center gap-3 px-[12px] py-[8px] rounded-[8px] text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span class="text-[16px]">Help</span>
+</a>
+<a class="flex items-center gap-3 px-[12px] py-[8px] rounded-[8px] text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span class="text-[16px]">Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-[220px] flex-1 h-full overflow-y-auto cyber-scrollbar p-[20px] bg-[#050816]">
+<!-- Header -->
+<header class="flex flex-col items-center justify-center mb-[25px] text-center">
+<h1 class="font-headline text-[38px] font-bold text-[#00e5ff] tracking-wider mb-2" style="text-shadow: 0 0 15px rgba(0,229,255,0.3);">
+                PRIORITY OVERRIDE
+            </h1>
+<p class="text-[#9ca3af] font-body text-[16px]">Manual Intervention Console - Unit 04</p>
+</header>
+<!-- Status Banner -->
+<div class="max-w-4xl mx-auto mb-[25px]">
+<div id="systemStatusBanner" class="bg-[#0f172a] border-2 border-[#00ff99] rounded-[12px] p-4 flex items-center justify-between glow-mint transition-colors duration-300">
+<div class="flex items-center gap-4">
+<span id="systemStatusIcon" class="material-symbols-outlined text-[#00ff99] text-3xl">verified_user</span>
+<div>
+<h2 id="systemStatusText" class="font-headline font-bold text-[18px] text-[#00ff99]">AI CONTROL ACTIVE</h2>
+<p id="systemStatusSub" class="font-label text-xs text-on-surface-variant">System nominal. YOLOv8 visual logic engaged.</p>
+</div>
+</div>
+<div class="font-label text-[24px] font-bold text-red-500" style="text-shadow: 0 0 15px red;">
+                    Live
+                </div>
+</div>
+</div>
+<!-- Layout Grid -->
+<div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-[25px]">
+<!-- Lane Selectors Area -->
+<div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4" id="lanesContainer">
+    <!-- Lane A -->
+    <div class="glass-panel rounded-[18px] p-[18px] flex flex-col items-center justify-between hover:-translate-y-[5px] transition-transform duration-300 relative group lane-card" data-lane="0" id="laneCard-0">
+        <div class="absolute top-2 right-2 flex gap-1 hidden" id="pulseIndicator-0">
+            <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+        </div>
+        <h3 class="font-headline font-bold text-[22px] text-on-surface mb-6">Sector A</h3>
+        <div class="w-[70px] h-[70px] rounded-full signal-orb-red mb-8 transition-colors duration-300" id="signalOrb-0"></div>
+        <div class="w-full space-y-2 text-center mb-6">
+            <div class="font-label text-xs text-on-surface-variant flex justify-between px-2">
+                <span>Density</span><span class="text-[#00e5ff]">42%</span>
+            </div>
+            <div class="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+                <div class="h-full bg-[#00e5ff] w-[42%]"></div>
+            </div>
+        </div>
+        <button class="w-full py-3 rounded-[14px] bg-transparent border border-[#00ff99] text-[#00ff99] font-bold text-sm hover:bg-[#00ff99] hover:text-black transition-colors duration-300" onclick="handleOverrideClick(0)" id="overrideBtn-0">
+            ACTIVATE GREEN
+        </button>
+    </div>
+
+    <!-- Lane B -->
+    <div class="glass-panel rounded-[18px] p-[18px] flex flex-col items-center justify-between hover:-translate-y-[5px] transition-transform duration-300 relative group lane-card" data-lane="1" id="laneCard-1">
+        <div class="absolute top-2 right-2 flex gap-1 hidden" id="pulseIndicator-1">
+            <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+        </div>
+        <h3 class="font-headline font-bold text-[22px] text-on-surface mb-6">Sector B</h3>
+        <div class="w-[70px] h-[70px] rounded-full signal-orb-red mb-8 transition-colors duration-300" id="signalOrb-1"></div>
+        <div class="w-full space-y-2 text-center mb-6">
+            <div class="font-label text-xs text-on-surface-variant flex justify-between px-2">
+                <span>Density</span><span class="text-[#22c55e]">89%</span>
+            </div>
+            <div class="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+                <div class="h-full bg-[#22c55e] w-[89%]"></div>
+            </div>
+        </div>
+        <button class="w-full py-3 rounded-[14px] bg-transparent border border-[#00ff99] text-[#00ff99] font-bold text-sm hover:bg-[#00ff99] hover:text-black transition-colors duration-300" onclick="handleOverrideClick(1)" id="overrideBtn-1">
+            ACTIVATE GREEN
+        </button>
+    </div>
+
+    <!-- Lane C -->
+    <div class="glass-panel rounded-[18px] p-[18px] flex flex-col items-center justify-between hover:-translate-y-[5px] transition-transform duration-300 relative group lane-card" data-lane="2" id="laneCard-2">
+        <div class="absolute top-2 right-2 flex gap-1 hidden" id="pulseIndicator-2">
+            <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+        </div>
+        <h3 class="font-headline font-bold text-[22px] text-on-surface mb-6">Sector C</h3>
+        <div class="w-[70px] h-[70px] rounded-full signal-orb-red mb-8 transition-colors duration-300" id="signalOrb-2"></div>
+        <div class="w-full space-y-2 text-center mb-6">
+            <div class="font-label text-xs text-on-surface-variant flex justify-between px-2">
+                <span>Density</span><span class="text-[#00e5ff]">12%</span>
+            </div>
+            <div class="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+                <div class="h-full bg-[#00e5ff] w-[12%]"></div>
+            </div>
+        </div>
+        <button class="w-full py-3 rounded-[14px] bg-transparent border border-[#00ff99] text-[#00ff99] font-bold text-sm hover:bg-[#00ff99] hover:text-black transition-colors duration-300" onclick="handleOverrideClick(2)" id="overrideBtn-2">
+            ACTIVATE GREEN
+        </button>
+    </div>
+</div>
+<!-- Command Log Panel -->
+<div class="bg-[#0f172a] rounded-[20px] p-[20px] flex flex-col h-[500px]" style="box-shadow: 0 0 25px rgba(0,0,0,0.5);">
+<div class="flex items-center justify-between border-b border-outline-variant pb-4 mb-4">
+<h3 class="font-headline font-bold text-[18px] text-[#00e5ff]">Command Logs</h3>
+<span class="material-symbols-outlined text-on-surface-variant text-sm">history</span>
+</div>
+<div class="flex-1 overflow-y-auto cyber-scrollbar space-y-3 pr-2">
+<div class="bg-[#111827] border-l-4 border-[#00e5ff] rounded-[10px] p-[12px]">
+<p class="font-label text-[12px] text-[#d1d5db] mb-1">10:42:05 - SYSTEM</p>
+<p class="font-body text-sm text-on-surface">YOLOv8 detected ambulance in Sector B. Auto-priority engaged.</p>
+</div>
+<div class="bg-[#111827] border-l-4 border-[#ff3b3b] rounded-[10px] p-[12px]">
+<p class="font-label text-[12px] text-[#d1d5db] mb-1">10:35:12 - OPERATOR 04</p>
+<p class="font-body text-sm text-on-surface">Manual Override Disabled for Sector A.</p>
+</div>
+<div class="bg-[#111827] border-l-4 border-[#00e5ff] rounded-[10px] p-[12px]">
+<p class="font-label text-[12px] text-[#d1d5db] mb-1">10:30:00 - SYSTEM</p>
+<p class="font-body text-sm text-on-surface">Standard cycle initialized. Density mapping normal.</p>
+</div>
+<div class="bg-[#111827] border-l-4 border-[#00e5ff] rounded-[10px] p-[12px]">
+<p class="font-label text-[12px] text-[#d1d5db] mb-1">10:25:44 - SYSTEM</p>
+<p class="font-body text-sm text-on-surface">Sector C density dropped below threshold. Re-allocating time.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+<script>
+    // Integration Logic
+    let currentOverrideLane = null;
+    let manualOverrideActive = false;
+    
+    const logsContainer = document.querySelector('.overflow-y-auto.cyber-scrollbar.space-y-3');
+
+    // Utility: Add Command Log
+    function addLog(message, type = 'info') {
+        const log = document.createElement("div");
+        const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+        
+        let borderColor = '#00e5ff'; // info
+        let titleColor = '#d1d5db';
+        
+        if (type === 'error') borderColor = '#ff3b3b';
+        if (type === 'success') borderColor = '#00ff99';
+        
+        log.className = `bg-[#111827] border-l-4 rounded-[10px] p-[12px] animate-fade-in`;
+        log.style.borderColor = borderColor;
+        
+        log.innerHTML = `
+            <p class="font-label text-[12px] text-[${titleColor}] mb-1">${time} - OPERATOR</p>
+            <p class="font-body text-sm text-on-surface">${message}</p>
+        `;
+        
+        logsContainer.prepend(log);
+    }
+
+    // Fetch initial status
+    async function fetchStatus() {
+        try {
+            const res = await fetch('/override_status');
+            const data = await res.json();
+            updateUI(data.manual_override, data.override_lane);
+        } catch (e) {
+            console.error("Error fetching status", e);
+        }
+    }
+
+    // Update the entire UI based on state
+    function updateUI(isActive, activeLaneIndex) {
+        manualOverrideActive = isActive;
+        currentOverrideLane = activeLaneIndex;
+
+        const banner = document.getElementById('systemStatusBanner');
+        const statusText = document.getElementById('systemStatusText');
+        const statusSub = document.getElementById('systemStatusSub');
+        const statusIcon = document.getElementById('systemStatusIcon');
+
+        if (isActive) {
+            banner.className = "bg-[#111827] border-2 border-red-500 rounded-[12px] p-4 flex items-center justify-between glow-red transition-colors duration-300";
+            statusText.className = "font-headline font-bold text-[18px] text-red-500";
+            statusText.innerText = "PRIORITY OVERRIDE ACTIVE";
+            statusSub.innerText = `Manual control engaged for Sector ${String.fromCharCode(65 + activeLaneIndex)}.`;
+            statusIcon.className = "material-symbols-outlined text-red-500 text-3xl";
+            statusIcon.innerText = "warning";
+        } else {
+            banner.className = "bg-[#0f172a] border-2 border-[#00ff99] rounded-[12px] p-4 flex items-center justify-between glow-mint transition-colors duration-300";
+            statusText.className = "font-headline font-bold text-[18px] text-[#00ff99]";
+            statusText.innerText = "AI CONTROL ACTIVE";
+            statusSub.innerText = "System nominal. YOLOv8 visual logic engaged.";
+            statusIcon.className = "material-symbols-outlined text-[#00ff99] text-3xl";
+            statusIcon.innerText = "verified_user";
+        }
+
+        // Update Lane Cards
+        for (let i = 0; i < 3; i++) {
+            const card = document.getElementById(`laneCard-${i}`);
+            const orb = document.getElementById(`signalOrb-${i}`);
+            const btn = document.getElementById(`overrideBtn-${i}`);
+            const pulse = document.getElementById(`pulseIndicator-${i}`);
+
+            if (isActive && i === activeLaneIndex) {
+                // This is the overridden lane
+                card.className = "bg-[#111827] border-2 border-[#00ff99] rounded-[18px] p-[18px] flex flex-col items-center justify-between scale-102 relative overflow-hidden transition-all duration-300";
+                card.style.boxShadow = "0 0 25px rgba(0,255,153,0.2)";
+                orb.className = "w-[70px] h-[70px] rounded-full signal-orb-green mb-8 transition-colors duration-300";
+                
+                btn.className = "w-full py-3 rounded-[14px] bg-[#ff3b3b] text-white font-bold text-sm shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:scale-105 transition-transform duration-300";
+                btn.innerText = "DISABLE OVERRIDE";
+                pulse.classList.remove('hidden');
+            } else {
+                // Normal lanes
+                card.className = "glass-panel rounded-[18px] p-[18px] flex flex-col items-center justify-between hover:-translate-y-[5px] transition-all duration-300 relative group lane-card";
+                card.style.boxShadow = "none";
+                orb.className = "w-[70px] h-[70px] rounded-full signal-orb-red mb-8 transition-colors duration-300";
+                
+                btn.className = "w-full py-3 rounded-[14px] bg-transparent border border-[#00ff99] text-[#00ff99] font-bold text-sm hover:bg-[#00ff99] hover:text-black transition-colors duration-300";
+                btn.innerText = "ACTIVATE GREEN";
+                pulse.classList.add('hidden');
+                
+                // If override is active on another lane, dim this button
+                if (isActive) {
+                    btn.classList.add('opacity-50', 'pointer-events-none');
+                } else {
+                    btn.classList.remove('opacity-50', 'pointer-events-none');
+                }
+            }
+        }
+    }
+
+    // Handle button click (Activate or Disable)
+    async function handleOverrideClick(laneIndex) {
+        if (manualOverrideActive && currentOverrideLane === laneIndex) {
+            // Disable
+            try {
+                const btn = document.getElementById(`overrideBtn-${laneIndex}`);
+                btn.innerText = "DISABLING...";
+                
+                const res = await fetch('/disable_override', { method: 'POST' });
+                const data = await res.json();
+                
+                if (data.success) {
+                    updateUI(false, null);
+                    addLog(`Manual Override Disabled for Sector ${String.fromCharCode(65 + laneIndex)}.`, 'info');
+                }
+            } catch (e) {
+                console.error(e);
+                addLog('Error disabling override. Check connection.', 'error');
+            }
+        } else if (!manualOverrideActive) {
+            // Activate
+            try {
+                const btn = document.getElementById(`overrideBtn-${laneIndex}`);
+                btn.innerText = "ACTIVATING...";
+                
+                const res = await fetch('/activate_override', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lane: laneIndex, reason: "Command Center Override" })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    updateUI(true, laneIndex);
+                    addLog(`Priority Override Activated → Sector ${String.fromCharCode(65 + laneIndex)}`, 'success');
+                }
+            } catch (e) {
+                console.error(e);
+                addLog('Error activating override. Check connection.', 'error');
+            }
+        }
+    }
+
+    // Initialize state on load
+    fetchStatus();
+    
+    // Auto-sync polling every 3 seconds to catch backend state changes
+    setInterval(fetchStatus, 3000);
+</script>
+</body></html>

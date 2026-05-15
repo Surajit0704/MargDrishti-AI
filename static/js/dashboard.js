@@ -2,7 +2,7 @@
 let countdown = 10;
 let interval;
 let cycleNumber = 0;
-const lanes = ["A", "B", "C"];
+const lanes = ["A", "B", "C", "D"];
 let currentCycleTime = 10;
 let chart;
 
@@ -54,10 +54,10 @@ function initChart() {
     chart = new Chart(DOM.densityChart, {
       type: "bar",
       data: {
-        labels: ["Lane A", "Lane B", "Lane C"],
+        labels: ["Lane A", "Lane B", "Lane C", "Lane D"],
         datasets: [{
-          data: [0, 0, 0],
-          backgroundColor: ["#06b6d4", "#22c55e", "#f97316"]
+          data: [0, 0, 0, 0],
+          backgroundColor: ["#06b6d4", "#22c55e", "#f97316", "#a855f7"]
         }]
       },
       options: {
@@ -377,3 +377,13 @@ function logCycleStats(data) {
     addLog(`Cycle ${cycleNumber}: Emergency phase held for ${data.timer}s.`, "variant");
   }
 }
+
+// ================= LIVE WEBCAM AUTO-REFRESH =================
+// Automatically refresh Lane 4 (Lane D) every 1 second
+// Appends a unique timestamp to prevent the browser from caching the image
+setInterval(() => {
+  const imgD = document.getElementById("img-D");
+  if (imgD) {
+    imgD.src = `/static/live_lane.jpg?t=${new Date().getTime()}`;
+  }
+}, 1000);

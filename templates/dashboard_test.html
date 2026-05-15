@@ -3,6 +3,7 @@
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="view-transition" content="same-origin" />
 <title>MargDrishti AI Command Center Dashboard</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;700;800&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
@@ -229,9 +230,13 @@
             </button>
 </div>
 <nav class="flex-1 flex flex-col gap-xs px-sm overflow-y-auto">
-<a class="flex items-center gap-sm px-sm py-sm rounded-DEFAULT bg-surface-variant text-primary border-r-4 border-primary scale-95 transition-transform" href="#">
+<a class="flex items-center gap-sm px-sm py-sm rounded-DEFAULT bg-surface-variant text-primary border-r-4 border-primary scale-95 transition-transform" href="/dashboard">
 <span class="material-symbols-outlined" data-icon="videocam">videocam</span>
 <span>Live Feed</span>
+</a>
+<a class="flex items-center gap-sm px-sm py-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-cyan-electric transition-all group" href="/city-map">
+<span class="material-symbols-outlined group-hover:text-cyan-electric group-hover:drop-shadow-[0_0_8px_#00e5ff] transition-all" data-icon="map">map</span>
+<span class="group-hover:text-cyan-electric group-hover:drop-shadow-[0_0_8px_#00e5ff] transition-all">Smart City Map</span>
 </a>
 <a class="flex items-center gap-sm px-sm py-sm rounded-DEFAULT text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" href="#">
 <span class="material-symbols-outlined" data-icon="psychology">psychology</span>
@@ -294,7 +299,7 @@
 <!-- Canvas -->
 <main class="flex-1 p-xl flex flex-col gap-xxl pb-32">
 <!-- Lane Grid -->
-<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-gutter">
 <!-- Lane A (Active) -->
 <div id="lane-A" class="lane-card bg-lane rounded-lg border border-primary glow-active-lane overflow-hidden flex flex-col transition-all duration-500">
 <div class="relative h-48 bg-surface-container-lowest overflow-hidden">
@@ -411,6 +416,48 @@
 </div>
 </div>
 </div>
+<!-- Lane D (Live Webcam) -->
+<div id="lane-D" class="lane-card bg-lane rounded-lg border border-glass overflow-hidden flex flex-col relative transition-all duration-500">
+<div class="relative h-48 bg-surface-container-lowest overflow-hidden">
+<img id="img-D" alt="Live Webcam Feed" class="w-full h-full object-cover opacity-90 transition-opacity" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='192'%3E%3Crect width='640' height='192' fill='%230e1416'/%3E%3Ctext x='50%25' y='50%25' fill='%234cd7f6' font-size='14' text-anchor='middle' dy='.3em' font-family='monospace'%3ELoading LIVE_WEBCAM...%3C/text%3E%3C/svg%3E"/>
+<div class="scanning-laser"></div>
+<div class="flow-arrows"><div class="arrow-up"></div><div class="arrow-up"></div><div class="arrow-up"></div></div>
+<div class="corridor-badge">CORRIDOR OPEN</div>
+<div class="absolute top-sm left-sm bg-black bg-opacity-70 px-sm py-xs rounded text-on-surface-variant font-body-ui text-log-entry border border-glass backdrop-blur-sm z-30">
+                            LIVE CAMERA FEED
+                        </div>
+<div class="absolute top-sm right-sm flex gap-xs">
+<span class="bg-black bg-opacity-70 px-sm py-xs rounded text-red-signal font-body-ui text-log-entry border border-red-signal border-opacity-30 backdrop-blur-sm animate-pulse">
+                                REC
+                            </span>
+</div>
+</div>
+<div class="p-md flex flex-col gap-sm">
+<div class="flex justify-between items-center">
+<h3 class="font-lane-title text-lane-title text-on-surface-variant">Lane D (Live)</h3>
+<!-- Traffic light strip: red / yellow / green -->
+<div class="flex gap-[5px] items-center">
+  <div id="red-D"    class="signal-light w-3.5 h-3.5 rounded-full bg-red-signal"></div>
+  <div id="yellow-D" class="signal-light w-3.5 h-3.5 rounded-full bg-yellow-signal"></div>
+  <div id="green-D"  class="signal-light w-3.5 h-3.5 rounded-full bg-secondary"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-sm border-t border-glass pt-sm">
+<div>
+<p class="text-on-surface-variant text-log-entry uppercase">Vehicles</p>
+<p class="count font-vehicle-count text-vehicle-count text-primary">-- vehicles</p>
+</div>
+<div>
+<p class="text-on-surface-variant text-log-entry uppercase">Density</p>
+<p id="density-D" class="font-vehicle-count text-vehicle-count text-on-surface">--</p>
+</div>
+</div>
+<div class="mt-xs bg-surface-container-low border border-glass rounded p-xs flex justify-between items-center">
+<span class="text-on-surface-variant text-log-entry">Ambulance</span>
+<span id="ambulance-D" class="text-secondary text-log-entry font-bold">--</span>
+</div>
+</div>
+</div>
 </section>
 <!-- Middle Section -->
 <section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
@@ -419,7 +466,13 @@
 <div class="absolute top-0 right-0 p-md opacity-20">
 <span class="material-symbols-outlined text-9xl text-primary" data-icon="psychology">psychology</span>
 </div>
-<h3 class="font-hero-title text-lane-title text-primary mb-md border-b border-glass pb-xs">AI Logic Matrix</h3>
+<div class="flex justify-between items-center mb-md border-b border-glass pb-xs">
+    <h3 class="font-hero-title text-lane-title text-primary">AI Logic Matrix</h3>
+    <a href="/city-map" class="flex items-center gap-1 text-xs font-bold text-cyan-electric border border-cyan-electric/30 hover:bg-cyan-electric/10 hover:border-cyan-electric px-3 py-1 rounded transition-all shadow-[0_0_10px_rgba(0,229,255,0.1)] hover:shadow-[0_0_15px_rgba(0,229,255,0.3)] z-20">
+        <span class="material-symbols-outlined text-sm">public</span>
+        VIEW CITY GRID
+    </a>
+</div>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-md z-10">
 <div class="bg-surface-container p-md rounded border border-glass">
 <p class="text-on-surface-variant text-log-entry uppercase mb-xs">Current Active</p>
@@ -553,9 +606,9 @@
             opacity: 1;
         }
         /* Per-colour glow when active */
-        #red-A.active,    #red-B.active,    #red-C.active    { box-shadow: 0 0 10px 3px rgba(255,59,59,0.7); }
-        #yellow-A.active, #yellow-B.active, #yellow-C.active { box-shadow: 0 0 10px 3px rgba(255,255,0,0.7); }
-        #green-A.active,  #green-B.active,  #green-C.active  { box-shadow: 0 0 10px 3px rgba(74,225,118,0.7); }
+        #red-A.active,    #red-B.active,    #red-C.active,    #red-D.active    { box-shadow: 0 0 10px 3px rgba(255,59,59,0.7); }
+        #yellow-A.active, #yellow-B.active, #yellow-C.active, #yellow-D.active { box-shadow: 0 0 10px 3px rgba(255,255,0,0.7); }
+        #green-A.active,  #green-B.active,  #green-C.active,  #green-D.active  { box-shadow: 0 0 10px 3px rgba(74,225,118,0.7); }
 
         /* ── Phase Timer signal dots ────────────────── */
         .timer-signal-dot { opacity: 0.2; transition: all 0.5s ease; }
@@ -582,7 +635,8 @@
         /* ── Image loading shimmer ──────────────────── */
         #img-A[src^="data:image/svg"],
         #img-B[src^="data:image/svg"],
-        #img-C[src^="data:image/svg"] {
+        #img-C[src^="data:image/svg"],
+        #img-D[src^="data:image/svg"] {
             animation: shimmer 1.5s ease-in-out infinite alternate;
         }
         @keyframes shimmer {
