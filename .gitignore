@@ -1,12 +1,12 @@
-<<<<<<< HEAD
+
 .venv/
 __pycache__/
 *.pyc
 runs/
-*.pt
+
 *.log
 .env
-=======
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
